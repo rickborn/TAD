@@ -4,14 +4,14 @@
 % 
 % Prompted by a tweet from Duncan Green referring to a post on his blog:
 % http://oxfamblogs.org/fp2p/how-to-stop-men-asking-all-the-questions-in-seminars-its-really-easy/
-%
+% 
 % Original source for data:
 % "Women’s visibility in academic seminars: women ask fewer questions than
 % men," Alecia Carter, Alyssa Croft, Dieter Lukas, Gillian Sandstrom
-%
+% 
 % RTB wrote it, 14 December 2017
 % RTB revised for TAD answers, original name was sexQuestionDemo.m
-
+% 
 % Concepts covered:
 % 1. histograms for summarizing data
 % 2. difference between 'sig' and 'not sig' is not itself nec. stat. sig.
@@ -29,7 +29,7 @@
 % two variables are the values for each seminar when a woman asked the 1st
 % question ('womanFirst') vs. when a man asked the 1st question
 % ('manFirst').
-
+% 
 % NOTE: I reverse-engineered the raw data based on the graphic in the piece
 % by The Economist, so the numbers might not be exactly correct
 %
@@ -97,14 +97,14 @@ text(-70,2/3*ax(4),tStr);
 % to the speakers. This male skew was observable only in those seminars in
 % which a man asked first question. When a woman did so, gender split
 % disappeared’. CHAIRS PLEASE NOTE – FIRST Q TO A WOMAN – EVERY TIME.’
-
+% 
 % It was based on this story he had read in The Economist:
-%
+% 
 % (https://www.economist.com/news/science-and-technology/ ...
 % 21732082-there-easy-fix-women-ask-fewer-questions-men-seminars)
 % Print edition | Science and technology
 % December 7, 2017
-%
+% 
 % "ONE theory to explain the low share of women in senior academic jobs is
 % that they have less self-confidence than men. This hypothesis is
 % supported by data in a new working paper, by a team of researchers from
@@ -122,11 +122,11 @@ text(-70,2/3*ax(4),tStr);
 % of the audience. Simply handing the microphone to a woman rather than a
 % man when the floor is opened for questions may make a difference, however
 % small, to one of academia’s most intractable problems."
-
+% 
 % This is a classic example of the fallacy that Gelman & Stern write about:
 % The Difference Between “Significant” and “Not Significant” is not Itself
 % Statistically Significant
-%
+% 
 % In other words, what the blogger did was two t-tests, one of which showed
 % that the man-first data are highly statistically significant from 0. That
 % is, men ask significantly more questions when a man asks the 1st Q.
@@ -139,11 +139,11 @@ text(-70,2/3*ax(4),tStr);
 % But this does not necessarily mean that the two groups are significantly
 % different FROM EACH OTHER. This is very common statistical error that is
 % beautifully described in a classic paper:
-%
+% 
 % Gelman A & Stern H (2006) "The Difference Between 'Significant' and 'Not
 % Significant' is not Itself Statistically Significant", The American
 % Statistician (2006) 60:328-331
-
+% 
 % To establish a difference between the two groups, you need to directly
 % compare them. A simple way is with a 2-sample t-test
 [~,pDiff,~,stats] = ttest2(womanFirst,manFirst);    % p = 4.6e-16
@@ -174,12 +174,12 @@ pRankSum = ranksum(manFirst,womanFirst);    % p = 5.9e-15
 % then when you divide the data into two subsets where the sex of the 1st
 % question asker is fixed, you create a bias in that direction. We can
 % simlulate this to see how big the bias effect is.
-
+% 
 % Keys to the simulation:
-% Under what hypothesis should we peroform our simulation? Ans.: H0
+% Under what hypothesis should we perform our simulation? Ans.: H0
 % What is H0? Ans.: M/W equally likely to ask question regardless of who
 % asks the 1st question.
-% How do we simlulate this?
+% How do we simulate this?
 
 % Eventually, I would probably convert the script to a function, in which
 % case, the below would be variables passed to the function:

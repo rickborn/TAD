@@ -7,7 +7,7 @@
 
 % cd 'C:\usr\rick\doc\Committees\PIN\PIN Director\Courses\Stats\TAD Fall 2017\TAD2017\Last class'
 fileName = 'IncomeByHgtData.xlsx';
-ds = dataset('xlsfile',fileName);
+ds = readtable(fileName);
 
 figure
 % jitter x-values for better viewing:
@@ -46,8 +46,9 @@ mdl2 = fitglm(ds,modelspec2,'Distribution','normal');
 
 % re-plot original data:
 figure
-h1 = plot(jHgt(ds.Male),ds.Income(ds.Male),'k+');
+plot(jHgt, ds.Income, 'b.');
 hold on
+h1 = plot(jHgt(ds.Male),ds.Income(ds.Male),'ks');
 h2 = plot(jHgt(~ds.Male),ds.Income(~ds.Male),'ro');
 %legend([h1,h2],{'Male','Female'},'Location','NorthWest');
 xlabel('Height (inches)');
