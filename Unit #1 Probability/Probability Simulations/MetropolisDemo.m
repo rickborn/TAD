@@ -33,6 +33,10 @@ function [allTh, allProp] = MetropolisDemo(nSims)
 % posposed island. If not, then he goes to the proposed island with
 % probability of P_proposed / P_current.
 
+% Great story on Arianna Rosenbluth, one of the developers of the
+% Metropolis algorithm:
+% https://www.radcliffe.harvard.edu/news-and-ideas/flash-of-genius
+
 % The plot re-capitulates Figure 7.2 of Kruschke
 
 if nargin < 1
