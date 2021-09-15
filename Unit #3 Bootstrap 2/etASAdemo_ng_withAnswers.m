@@ -2,6 +2,15 @@ function [rT,dT,orHat,bCoef] = etASAdemo_ng_withAnswers(miFlag)
 
 % etASAdemo_ng_withAnswers.m: Bootstrap test for odds ratio
 %
+% Inputs:
+% - miFlag: 1 = MI data; 0 = stroke data
+%
+% Outputs:
+% - rT, results summary table
+% - dT, data table
+% - orHat, odds ratio calculated from the data in dT
+% - bCoef, beta coefficients from logistic regression
+%
 % Bootstrap example for Stroke data from pp. 3-5 of Efron & Tibshirani
 % 
 % RTB wrote it 29 October 2016 (derived from BS_ex1.m)
@@ -104,7 +113,7 @@ nTotal = nRx + nCtrl;
 % TODO: calculate the odds ratio for this study
 orHat = (nErx / (nRx-nErx)) / (nEctrl / (nCtrl-nEctrl));
 
-% QUESTION (Q1): What is your odds ratio to 4 decimal places?
+% QUESTION (Q1): What is your odds ratio to 2 decimal places?
 
 %% Create a population from which to resample:
 
@@ -265,7 +274,7 @@ end
 
 % TODO: Perform resampling as though the patients all belonged to the
 % same group (called H0data), shuffle this data, then arbitraily assign
-% each patient to the treatment or control group and compute the odd ratio. 
+% each patient to the treatment or control group and compute the odds ratio. 
 % Store each bootstrapped odds ratio in orPerm
 
 % Pool all the data:
@@ -354,6 +363,24 @@ end
 % small?)" or does that just move the problem?
 %
 % See my article: https://www.eneuro.org/content/6/6/ENEURO.0456-19.2019
+
+%% Compare with the Fisher Exact Test for Stroke data
+
+% load the data into an object of type 'table'
+strokeData = table([nErx;nEctrl],[nRx-nErx;nCtrl-nEctrl],...
+    'VariableNames',{'Stroke','NoStroke'},'RowNames',{'ASA','NoASA'});
+
+% TODO: Calculate a 2-tailed p-value and 95% confidence interval using
+% Fisher's Exact Test
+[~,pStroke,statsStroke] = fishertest(strokeData,'Tail','both','Alpha',0.05);
+
+% QUESTION (Q9): What p-value does Fisher's Exact Test give?
+% pStroke = 0.1723
+
+% QUESTION (Q10): What is the lower bound of the 95% CI from Fisher's Exact
+% Test?
+% statsStroke = OddsRatio: 1.2163
+%    ConfidenceInterval: [0.9297 1.5912]
 
 %% Compare with a Chi-square test
 
@@ -465,8 +492,11 @@ relativeRiskReductionFx = ((nFxRx/nFosRx) - (nFxCtrl/nFosCtrl)) / (nFxCtrl/nFosC
 
 %% Super Bonus: Using the linear model
 
+% Come back and re-visit this section after we do logistic regression in
+% week #6.
+
 % There is a binary outcome variable and a binary treatment, so this is
-% just logistic regression with an indicator variable. Let's try:
+% just logistic regression with an indicator variable. Let's try it:
 
 % We first need to create our 'x' (treatment) and 'y' (outcome) variables:
 % outcomes for treatment group (1 = had event):
@@ -478,7 +508,7 @@ yCtrl = [ones(nEctrl,1);zeros(nCtrl-nEctrl,1)];
 % inputs for control group (all 0's):
 xCtrl = zeros(nCtrl,1);
 
-% concatenate the x's and y's
+% concatenate all of the x's and y's
 Y = [yRx;yCtrl];
 X = [xRx;xCtrl];
 
@@ -538,4 +568,4 @@ rT = table([confInterval(1);statsE.ConfidenceInterval(1);NaN;ciLR(1)],...
     [pVal2t;pE;pChi2;stats.p(2)],...
     'VariableNames',{'CI_lo','CI_hi','p-val'},...
     'RowNames',{'Bootstrap','FET','Chi2','LR'});
-%display(resultsTable);
+display(rT);

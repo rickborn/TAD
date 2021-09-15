@@ -96,7 +96,7 @@ legend('Census','Sample','Sample','Census','Location','NorthWest');
 meanGRE = ;
 semGRE = ;
 
-% QUESTION (Q1): What is the value of semGRE to 2 decimal places?
+% QUESTION (Q1): What is the value of semGRE to 1 decimal place?
 
 %% "True" standad error by sampling from the population
 
@@ -122,7 +122,7 @@ ax = axis;
 % TODO: calculate the standard error of the mean from this sample:
 semGREsamp = ;
 
-% QUESTION (Q2): What is the value of semGREsamp to 2 decimal places?
+% QUESTION (Q2): What is the value of semGREsamp to 1 decimal place?
 
 %% Bootstrap standard error by sampling from the sample
 
@@ -146,7 +146,7 @@ axis(ax);
 % TODO: calculate the standard error of the mean from the bootstrap
 % sampling distribution of the means:
 semGREboot = ;
-% QUESTION (Q3): What is the value of semGREboot to 2 decimal places?
+% QUESTION (Q3): What is the value of semGREboot to 1 decimal place?
 
 % TODO: Compare your bootstrap estimate of the SE with that from the
 % formula:
@@ -195,7 +195,7 @@ end
 % Compute standard error of our correlation coefficient
 seRhoBootFL = ;
 
-% QUESTION (Q8): What is the value of seRhoBootFL to 4 decimal places?
+% QUESTION (Q8): What is the value of seRhoBootFL to 2 decimal places?
 
 %% Do the same thing using MATLAB's built-in 'bootstrp' function
 
@@ -218,7 +218,7 @@ seRhoBoot = std(bsRhos);
 
 % QUESTION (Q9): What is the mean of this distribution to 2 decimal places?
 
-% QUESTION (Q10): What is the s.d. of this distribution to 4 decimal places?
+% QUESTION (Q10): What is the s.d. of this distribution to 2 decimal places?
 
 % QUESTION (Q11): How do these values compare between the 2 methods you
 % used (i.e. 'for' loop vs. 'bootstrp')?
@@ -430,6 +430,6 @@ line([ci(2),ci(2)],[bsAxis(3),bsAxis(4)],'Color','y');
 
 % QUESTION (Q23): Today we've explored bootstrapping as a way to estimate
 % standard errors and confidence intervals for means and correlation
-% coefficients. Which of these measures are the most robust across our
-% different ways of bootstrapping and estimating? Which are more sensitive
-% to the method we chose?
+% coefficients. Comparing standard errors with 95% confidence intervals,
+% which is more robust and which is more sensitive to the particular method
+% we chose to calculate it?

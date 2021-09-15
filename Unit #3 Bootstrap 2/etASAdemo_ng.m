@@ -86,7 +86,7 @@ nTotal = nRx + nCtrl;
 % TODO: calculate the odds ratio for this study
 orHat = ;
 
-% QUESTION (Q1): What is your odds ratio to 4 decimal places?
+% QUESTION (Q1): What is your odds ratio to 2 decimal places?
 
 %% Create a population from which to resample:
 

@@ -296,6 +296,33 @@ text(xTxt,yTxt,txtStr);
 % were 127 seminars instead of 249?
 % ANSWER: The variance would increase. Simulate it and test your intuition!
 
+%% Testing Elyza Kelly's code (TAD 2021)
+
+for k = 1:nSims
+    % Simulate data for one experiment under H0: each row is a question,
+    % each column a seminar. Assume a value of '1' means a woman asked the
+    % question; '0' means a man asked it.
+    newSeminar=round(rand(nQperSeminar,nSeminars));
+    % Sort according to who asked the 1st questions.
+    newmanFirst=newSeminar(1:end,newSeminar(1,:)==0);
+    newwomanFirst=newSeminar(1:end,newSeminar(1,:)==1);
+    
+    % Now calculate our effect size metric. Assume that attendance is
+    % 50/50. So we want to know the proportion of 1's (woman-asked
+    % questions) in each column
+  
+    SW=sum(newwomanFirst,'all');
+    %SM=(nSeminars*nQperSeminar)-SW; % This is the problem
+    SM=sum(newmanFirst,'all');
+    wfperSeminar=SW/(length(newwomanFirst)*nQperSeminar);
+    effectWF=(wfperSeminar-0.5)*100;
+    mfperSeminar=SM/(length(newmanFirst)*nQperSeminar);
+    effectMF=(mfperSeminar-0.5)*100;
+    % Store the effect size for this simulation
+    allEffectSizes(k)=mean(effectWF)-mean(effectMF);
+end
+display(mean(allEffectSizes));
+
 %% Confidence
 
 % QUESTION: What is the smallest number of questions per seminar for which

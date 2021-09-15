@@ -391,6 +391,57 @@ rho95CIhi = meanRhoBoot + (seRhoBoot * numStdDeviates);
 l1=line([rho95CIlow,rho95CIlow],[bsAxis(3),bsAxis(4)],'Color',[0.75,0,0],'LineWidth',2);
 line([rho95CIhi,rho95CIhi],[bsAxis(3),bsAxis(4)],'Color',[0.75,0,0],'LineWidth',2);
 
+%% Bonus: normalizing correlation coefficients: Fisher's z-transform
+
+% The above method fails badly--we can't get a rho value > 1--because our
+% distribution is not well approximated by the normal distribution. But
+% because the normal distribution is so useful in statistics, statisticians
+% have spent considerable effort in developing transforms that will
+% 'normalize' non-normal distributions. R. A. Fisher developed one for
+% correlation coefficients. So we could transform our bootstrap data, find
+% the CI's, then transform back. Let's try it.
+
+% Transform the data:
+bsZ = 0.5 .* log((1+bsRhos) ./ (1-bsRhos));
+% This is our mean correlation:
+meanZBoot = mean(bsZ);
+
+% This is our 68% CI
+seZBoot = std(bsZ);
+
+% For a 95% CI:
+myAlpha = 0.05;
+
+% You probably remember that a 95% CI is +/- 1.96 standard deviates. So we
+% could calculate our CI as meanRhoBoot +/- 1.96*seRhoBoot. But say we
+% wanted to be able to calculate any arbitrary confidence interval. For a
+% 99% CI, we would set myAlpha to 0.01.
+
+% TODO: Write a line of MATLAB code that will convert a desired CI,
+% expressed as myAlpha to the appropriate number of standard deviates:
+numStdDeviates = norminv(1-myAlpha/2);
+
+% QUESTION (Q17): What is numStdDeviates for myAlpha = 0.001?
+
+% TODO: Calculate the lower and upper bounds for the 95% CI
+z95CIlow = meanZBoot - (seZBoot * numStdDeviates);
+z95CIhi = meanZBoot + (seZBoot * numStdDeviates);
+% back-transform to get back into rho space:
+rho_z95CIlow = tanh(z95CIlow);
+rho_z95CIhi = tanh(z95CIhi);
+
+% Plot these:
+% figure
+% histogram(bsZ,'Normalization','probability');
+% hold on
+% xlabel('Z-transformed rhos'); ylabel('Probability');
+% title('Distribution of Z values: bootstrap')
+% bsAxis = axis;
+
+% Draw lines for the 95%CI on our histogram in red ink:
+% l1=line([z95CIlow,z95CIlow],[bsAxis(3),bsAxis(4)],'Color',[0.75,0,0],'LineWidth',2);
+% line([z95CIhi,z95CIhi],[bsAxis(3),bsAxis(4)],'Color',[0.75,0,0],'LineWidth',2);
+
 %% CI by percentile method:
 
 % In this case, we generated 10,000 samples, so a more intuitive,
@@ -474,4 +525,8 @@ end
 l3=line([ci2(1),ci2(1)],[bsAxis(3),bsAxis(4)],'Color',[0,0,0.5],'LineWidth',2);
 line([ci2(2),ci2(2)],[bsAxis(3),bsAxis(4)],'Color',[0,0,0.5],'LineWidth',2);
 
-legend([l1 l2 l3],{'Nl. approx.','Percentile','BCA'},'Location','Northwest');
+% CIs for parametric after z-transform
+l4=line([rho_z95CIlow,rho_z95CIlow],[bsAxis(3),bsAxis(4)],'Color',[0,0.5,0],'LineWidth',2);
+line([rho_z95CIhi,rho_z95CIhi],[bsAxis(3),bsAxis(4)],'Color',[0,0.5,0],'LineWidth',2);
+
+legend([l1 l2 l3 l4],{'Nl. approx.','Percentile','BCA','Z trans'},'Location','Northwest');
