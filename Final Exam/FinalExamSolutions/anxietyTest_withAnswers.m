@@ -1,6 +1,6 @@
 % anxietyTest_withAnswers.m
 %
-% solution code for Thornquist test questions
+% solution code for Stephen Thornquist test questions
 % RTB wrote it, 27 Oct 2017
 
 % Questions 15-22 will be related to the same data ("anxiety.mat" in the
@@ -101,7 +101,7 @@ title('Controls');
 % A18: Yes. In the experimental group, scores on all tests are correlated,
 % with correlation coefficients ranging from 0.54 to 0.82, and all are
 % statistically significant at p < 0.05. Similar for the control group,
-% thought tests 1 and 5 do not appear significantly correlated:
+% though tests 1 and 5 do not appear significantly correlated:
 
 
 % Q19: How should your findings about the correlations of the tests adjust
@@ -136,7 +136,7 @@ title('Controls');
 % muExpt = [1,1,1,1,1] and muCtl = [0,0,0,0,0]. They both used the same
 % covariance matrix.
 nSamp = 20;     % number per group
-myCorr = 0.6;   % correlation among tests
+myCorr = 0.6;   % average correlation among tests
 muExpt = [1,1,1,1,1];   % normalized mean of experimental group
 muCtrl = [0,0,0,0,0];   % normalized mean of control group
 % covariance matrix:
@@ -180,7 +180,7 @@ FWERuncorr = 1 - 0.95^nTests;
 mySigma = ones(5,5);    % and repeat lines 119-130
 % This gives 0.0504
 % Or you can just realize that if the scores all are perfectly correlated,
-% we have really only done one test, so FWER = alpha for single test.
+% we have really only done one test, so FWER = alpha for a single test.
 % Brian Healy gave an example in his multiple comparisons lecture of
 % comparing heights between two groups, but coding the heights (single
 % measurement) in five different ways: cm., in., ft., m., yds.

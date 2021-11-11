@@ -2,7 +2,7 @@
 %
 % The goal of this exercise is to introduce you to fitting regression
 % models in MATLAB, to regression diagnostics and to estimating prediction
-% error using cross-validation. In addition, we will re-inforce
+% error using cross-validation. In we will re-inforce
 % bootstrapping methods and show how versatile this approach is for
 % calculating standard errors and confidence intervals.
 %
@@ -72,7 +72,7 @@
 % load data, p. 107 of E&T
 ds = readtable('DrugData.xlsx');
 
-% plot it with different symbols for the different lots:
+% plot it with different colors and symbols for the different lots:
 figure, gscatter(ds.hrs,ds.amount,ds.lot,'brg','xos');
 hold on
 xlabel('Time implanted (hrs)'); ylabel('Drug remaining (mg)');
@@ -97,7 +97,7 @@ title('Tests of osmotic mini-pump for drug delivery');
 % variable:
 nPts = length(ds.hrs);  % number of data points, useful for many things
 const = ones(nPts,1);
-[~,betaCI,rawResiduals,~,stats] = regress(ds.amount,[const,ds.hrs]);
+[betaCoef,betaCI,rawResiduals,~,stats] = regress(ds.amount,[const,ds.hrs]);
 
 % QUESTION (Q2): Do the confidence intervals for our beta coefficients
 % indicate a significant linear relationship between amount of time
@@ -363,9 +363,9 @@ figure, qqplot(mdl1.Residuals.Raw);
 % likely come from the same distribution.
 
 % Start with a non-normal distribution we have good intuition about:
-% TODO: Take 10,000 draws from a uniform discrete random distribution with
+% TODO: Take 1,000 draws from a uniform discrete random distribution with
 % a maximum of 10 and store it in a variable called 'A'
-A = unidrnd(10,10000,1);
+A = unidrnd(10,1000,1);
 figure, subplot(3,1,1)
 histogram(A);
 

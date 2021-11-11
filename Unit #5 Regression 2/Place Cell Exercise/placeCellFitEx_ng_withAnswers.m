@@ -142,7 +142,11 @@ axis([-10,110,ax(3),ax(4)]);
 % total length of the experiment.
 subplot(nr,nc,nc+2)
 
-%ANSWER
+%ANSWER:
+% NOTE: We use the 'hist' command just to do our binning without creating
+% the histogram directly. We create the plot in the next line using the
+% 'bar' function to create a barplot. The reason for doing this is that we
+% need the values in 'occupancyHist' to do our bin-time normalization.
 occupancyHist = hist(ratPosition,positionBins)/1000;
 bar(positionBins,occupancyHist);
 
@@ -486,7 +490,7 @@ ylabel('FR (spikes/s)');
 
 % "There is not a single procedure for measuring goodness-of-fit; instead
 % there are many tools that, taken together, can provide a broad
-% perspective on the strenghts and weaknesses of a set of models." 
+% perspective on the strengths and weaknesses of a set of models." 
 % Kramer & Eden, p. 280
 
 %% Method 1: Comparing Akaike's Information Criterions (AIC) values

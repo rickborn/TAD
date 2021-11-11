@@ -50,8 +50,8 @@ for jSim = 1:nSims
     end
 end
 FPrate = (sum(FP) / nSims) * 100;
-% ANSWER for 10/100: 16.73, which rounds to 17
-% ANSWER for 5/50: 13.4
+% ANSWER for nAddObs/nMax = 10/100: 16.73, which rounds to 17
+% ANSWER for nAddObs/nMax = 5/50: 13.4
 
 % Note: Using 'rng default' does not guarantee that everyone will get the
 % exact same answer. In fact, it can create fixed differences depending on
@@ -183,10 +183,10 @@ allSamples = randn(n,2,nSims);
 allSamples(:,2,:) = allSamples(:,2,:) + dPrimeSim;
 
 % Now run our t-test (default is alpha = 0.05):
-[h,pVals] = ttest2(squeeze(allSamples(:,2,:)),squeeze(allSamples(:,1,:)));
+[~,pVals] = ttest2(squeeze(allSamples(:,2,:)),squeeze(allSamples(:,1,:)));
 
 % Find the proportion of *published* p-values less-than-or-equal to 0.01:
-perCentAtCrit = round((sum(pVals <= 0.01) / sum(h))*100);
+perCentAtCrit = round((sum(pVals <= 0.01) / sum(pVals <= 0.05))*100)
 
 % ANSWER: 86%
 

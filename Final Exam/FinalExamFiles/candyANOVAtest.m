@@ -60,13 +60,16 @@ nPerm = 1000;
 % HINT: You want to shuffle all of the data as if you had misplaced all of
 % the season labels, but then reformat the data so that it looks like your
 % original data set (i.e. separated into four columns of 'fake' seasons),
-% then run 'anova1' to get the F-statistic
+% then run 'anova1' to get the F-statistic.
+
+% NOTE: When you run you anova within the 'for' loop, you don't want to
+% display the anova table each time. You can suppress the table output:
+% anova1(data,[],'off');
 
 % variable to hold each permuted F-statistic:
 permFs = zeros(nPerm,1);
 
 !!! Your code here:
-
 for k=1:nPerm
     % shuffle the data:
     

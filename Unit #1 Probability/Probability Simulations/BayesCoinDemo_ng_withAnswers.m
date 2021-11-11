@@ -211,9 +211,20 @@ title('Prior based on 3H1T');
 % reasonably sure, a priori, that it is a fair coin. However, we are still
 % willing to entertain the notion that the coin might be biased in one
 % direction or the other. We can implement this prior using a normal
-% distriubution centered around 'fairness' (i.e. p(H) = 0.5) but having a
+% distribution centered around 'fairness' (i.e. p(H) = 0.5) but having a
 % width that reflects our uncertainty about the fairness hypothesis:
-priorGaussFair = normpdf(pi0,0.5,0.25);
+
+%NOTE: a real Bayesian would use a beta distribution, betapdf, with
+%parameters a = H-1 and b = T-1.
+% Priors corresponding to a previous toss outcomes of HkTn–k are beta
+% distributions with a = k + 1 and b = n – k + 1. For example, the prior
+% for H15T5 has a shape of beta(16,6). For a prior of beta(a,b), a toss
+% outcome of HkTn–k will have a posterior of beta(a + k, b + n – k). For
+% example, the posterior for a toss outcome of H3T1 using a H15T5 prior is
+% beta(19,7).
+%priorGaussFair = normpdf(pi0,0.5,0.25);
+% The line below would be the prior based on 10 heads, 10 tails
+priorGaussFair = betapdf(pi0,11,11);
 priorGaussFair = priorGaussFair ./ trapz(priorGaussFair);
 
 % Then we observe an outcome of 3H1T:
@@ -246,7 +257,9 @@ title('Gaussian prior around 0.5');
 % not very willing to entertain hypotheses like p(H) = 1.
 
 % TODO: Create a Gaussian prior with a standard deviation of 0.1
-priorGaussFairNew = normpdf(pi0,0.5,0.1);
+%priorGaussFairNew = normpdf(pi0,0.5,0.1);
+% The line below would be the prior based on 100 heads, 100 tails
+priorGaussFairNew = betapdf(pi0,101,101);
 priorGaussFairNew = priorGaussFairNew ./ trapz(priorGaussFairNew);
 
 % Then we observe an outcome of 3H1T:
