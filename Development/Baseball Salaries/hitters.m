@@ -1,6 +1,11 @@
 % hitters.m
 %
-% data is from "Introduction to Statistical Learning"
+% Builds intuition on regression trees for machine learning
+%
+% RTB wrote it, summer 2021 for use in code4fun ML course with Andrei
+% Grigoriev.
+
+%% Data is from "Introduction to Statistical Learning"
 % see "Hitters" in the file ISLR.pdf
 % 
 % This data was originally part of the 'R' data base for ISLR:

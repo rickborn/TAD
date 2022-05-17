@@ -9,7 +9,7 @@
 fileName = 'IncomeByHgtData.xlsx';
 ds = readtable(fileName);
 
-figure
+figure;
 % jitter x-values for better viewing:
 jFactor = 0.5;
 jitterX = (rand(length(ds.Hgt),1) .* jFactor) - (jFactor/2);
@@ -20,14 +20,57 @@ jHgt = ds.Hgt+jitterX;
 plot(jHgt, ds.Income, 'b.');
 hold on
 % draw the least-squares regression line:
-lsline
+hl = lsline;
+set(hl,'Color','k','LineWidth',2);
 xlabel('Height (inches)');
 ylabel('Income (thousands of $)');
+x = xlim;
 
 %% Do simple regression
 modelspec1 = 'Income ~ Hgt';
 mdl1 = fitglm(ds,modelspec1,'Distribution','normal');
 [b1,dev1,stats1] = glmfit(ds.Hgt,ds.Income);
+
+%% Suppose we didn't know about regression.
+% How might we develop an intuition about whether the slope is not 0?
+
+% resample pairs from data set (with replacement) and replot a line:
+nBoot = 1000;
+nPairs = length(ds.Hgt);
+allSlopes = zeros(nBoot,1);
+
+for k = 1:nBoot
+    % random sample with replacement
+    randNdx = unidrnd(nPairs,nPairs,1);
+    % calculate regression parameters:
+    [allSlopes(k),b] = l_regression(ds.Hgt(randNdx),ds.Income(randNdx));
+    % calculate the regression line:
+    y = b + (allSlopes(k) .* x);
+    hl = line(x,y,'Color','r','LineWidth',0.3);
+end
+    
+figure
+histogram(allSlopes);
+
+% Motivated by Gelman & Carlin 2014:
+% Beyond Power Calculations: Assessing Type S (Sign) and Type M (Magnitude)Errors
+%
+% Abstract: Statistical power analysis provides the conventional approach to
+% assess error rates when designing a research study. However, power
+% analysis is flawed in that a narrow emphasis on statistical significance
+% is placed as the primary focus of study design. In noisy, small-sample
+% settings, statistically significant results can often be misleading. To
+% help researchers address this problem in the context of their own
+% studies, we recommend design calculations in which (a) the probability of
+% an estimate being in the wrong direction (Type S [sign] error) and (b)
+% the factor by which the magnitude of an effect might be overestimated
+% (Type M [magnitude] error or exaggeration ratio) are estimated. We
+% illustrate with examples from recent published research and discuss the
+% largest challenge in a design calculation: coming up with reasonable
+% estimates of plausible effect sizes based on external information.
+%
+% This would be the probability of a Type S error:
+pWrongDirection = sum(allSlopes < 0) / nBoot;
 
 %% Lurking variable: sex
 % men taller than women and make more $$$

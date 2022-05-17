@@ -339,7 +339,7 @@ while propLT25 < 0.95
     
 end
 
-display(nQtest);  % Answer is 5
+%display(nQtest);  % Answer is 5
 
 % QUESTION: How could you eliminate this bias?
 % ANSWER1 (best): Sort by the 1st question, but exclude it from the calculation.

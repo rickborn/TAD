@@ -1,13 +1,13 @@
 % PsychicDilemma.m
 %
 % RTB wrote it, 18 August 2018. New exercise for QMBC.
-% RTB added Bayesian approach sections, 10 November 2021, at BWH for
+% RTB added Bayesian approach sections, 10 November 2021, at BWH awaiting
 % treatment of atrial fibrillation
 %
 % Tip o'the Pin to John K. Kruschke's, "Doing Bayesian Data Analysis"
 % see Chapter 11, p. 297 on "Null Hypothesis Significance Testing"
 %
-% see also: pNflips2getZheads.m
+% see also my function: pNflips2getZheads.m
 
 %% An experiment in telekinesis
 
@@ -183,12 +183,12 @@ pFixedZ = nbincdf(nTrials-nHeads-1,nHeads,pNull,'upper');
 % two p-values we obtained are not that different--they just happen to fall
 % on opposite sides of the sacred 0.05.
 
-%% The Bayesian approach, dumbed down
+%% Simple Bayesian approach: calculating a Bayes Factor
 
 % Let's imagine that we have only two specific hypotheses:
 %   H0: She is NOT psychic and the behavior of the coin is pH = pT = 0.5
-%   HA: She IS psychic, and can influence pH = 0.25 and pT = 0.75
-%
+%   HA: She IS psychic, and can influence such that pH = 0.25 and pT = 0.75
+% 
 % In this case, we first calculate the likelihood of our data under the two
 % different hypotheses:
 pH0 = 0.5;
@@ -198,19 +198,22 @@ nTrials = 25;
 
 pDataGivenH0 = (pH0.^nHeads).*((1-pH0).^(nTrials-nHeads));
 pDataGivenHA = (pHA.^nHeads).*((1-pHA).^(nTrials-nHeads));
+% We could, of course, also use 'binopdf'
 
 % A common way to compare these is with a ratio, known as a 'Bayes Factor'.
 % In this case, we'll put the probability of the alternative hypothesis in
 % the numerator, so that we effectively calculating the likelihood ratio in
-% favor of our alternative hypothesis. This is typically notated as 'BF10'
+% favor of our alternative hypothesis. This is typically notated as 'BF_10'
 % to indicate that the null is in the denominator. If we did it the
-% opposite way (i.e. null in numerator), we'd write it as 'BF01'
-BF10 = pDataGivenHA / pDataGivenH0;
+% opposite way (i.e. null in numerator), we'd write it as 'BF_01'
+BF_10 = pDataGivenHA / pDataGivenH0;
+
+%% Simple Bayesian Approach: calculating a Posterior Probability
 
 % So we see that our data are roughly 4x more likely under the alternative
 % hpothesis than under H0. Does this mean we stop here and declare our
 % subject a psychic?
-
+% 
 % NO! From an epistemological perspective, the Bayes Factor is an
 % indication of how much our experiment should change our belief. In this
 % case, whatever our beliefs about psychic powers were before our
@@ -229,6 +232,7 @@ pHAGivenData = (pDataGivenHA * priorHA) / ...
 % So our new belief is that the probability that our suject is psychic is
 % 0.0038. Greater than when we started, but still a pretty remote
 % possibility.
+%
 % [NOTE: To be precise, we should multiply our prior ODDS RATIO by the
 % Bayes Factor. But for very small p, the odds = p. See my 'p2odds.m'
 
@@ -241,12 +245,14 @@ pHAGivenData = (pDataGivenHA * priorHA) / ...
 % hypothesis that makes our Bayes Factor as large as possible:
 pH = 0:0.01:1;
 pDataGivenH = (pH.^nHeads).*((1-pH).^(nTrials-nHeads));
+% Note that this will be approximate, limited by the grain of pH
 pHmax = pH(pDataGivenH == max(pDataGivenH));
 
 % In this case, our most charitable estimate of the psychic's ability is
-% that she can make pHead = 0.32 and pTail = 0.68
+% that she can make pHead = 0.32 and pTail = 0.68. Or, in other words,
+% pHead = 0.32 is the most likely explanation of the data she produced.
 
-% So now we can re-run our calculation using this value:
+% So now we re-run our calculation using this value:
 priorHA = 0.001;
 pH0 = 0.5;
 pHA = pHmax;
@@ -261,7 +267,9 @@ maxBF = pDataGivenHA / pDataGivenH0;
 
 % Note that in the literature, it is more common to use the version of the
 % Bayes Factor with pDataGivenH0 in the numerator, in which case we write
-% it as BF01. In this case, we are looking for the "minimum Bayes Factor."
+% it as BF_01. In this case, we are looking for the "minimum Bayes Factor."
+% But what we calculated above is also related to what Val Johnson calls a
+% "uniformly most powerful Bayesian test" (UMPBT).
 
 % There is an extensive literature on relating p-values to Bayes Factors
 % and using them to adjust beliefs. For starters see:
@@ -278,7 +286,7 @@ maxBF = pDataGivenHA / pDataGivenH0;
 % Nuzzo R. Scientific method: statistical errors. Nature. 2014 Feb
 % 13;506(7487):150-2.
 
-%% The full Bayesian approach: all H's considered
+%% Bonus: The full Bayesian approach: all H's considered
 
 % The above calculation of the maximum Bayes Factor already gives us a hint
 % of the more proper Bayesian approach. Just as we calculated a likelihood
@@ -305,6 +313,8 @@ posteriorProb = posteriorProb ./ trapz(posteriorProb);
 
 figure
 plot(pH,priorGaussFair,'k-',pH,pDataGivenH,'r-',pH,posteriorProb,'b-');
-legend('Prior','Likelihood','Posterior', 'Location','northwest');
 xlabel('\pi'); ylabel('P(\pi)');
 title('Gaussian prior around 0.5');
+ax = axis;
+hl = line([pH0,pH0],[ax(3),ax(4)],'Color','k','LineStyle','--');
+legend('Prior','Likelihood','Posterior','H0','Location','northwest');
