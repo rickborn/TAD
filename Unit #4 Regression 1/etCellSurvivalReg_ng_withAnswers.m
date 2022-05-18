@@ -1,4 +1,4 @@
-% etCellSurvivalReg.m
+% etCellSurvivalReg_ng_withAnswers.m
 %
 % E & T example of cell survival data, pp. 115-121
 %
