@@ -29,11 +29,16 @@
 % well their flood forecasts had done in the past--was about plus or minus
 % nine feet . . . ."
 
-% QUESTION 1: Assuming what Silver is calling the "margin of error"
-% corresponds to a 95% confidence interval, what is the probability that
-% the water exceeded the 51-foot height of the levee?
+%% QUESTION 1: What is the probability the water level will exceed the levee
 
-p1 = 1 - normcdf(51,49,9/1.96);
+% Assuming what Silver is calling the "margin of error" corresponds to a
+% 95% confidence interval (which is how wikipedia defines it), what is the
+% probability that the water exceeded the 51-foot height of the levee?
+
+leveeHgt = 51;  % units = feet
+predHgt = 49;
+CI95 = 9;       % units = feet; SD = 9/1.96
+p1 = 1 - normcdf(leveeHgt,predHgt,CI95/1.96);
 % ANSWER: 0.33
 %
 % Explanation: In order to use 'normcdf' we need to convert the confidence
@@ -48,23 +53,32 @@ p1 = 1 - normcdf(51,49,9/1.96);
 % height of the levees, or 51 feet), so to find the probability of the
 % water level exceeding 51 feet, we subtract the area from the total area
 % of 1. We could also use:
-p2 = normcdf(51,49,9/1.96,'upper');
+p2 = normcdf(leveeHgt,predHgt,CI95/1.96,'upper');
+
+%% Same calculation by simulation:
 
 % Suppose you didn't know about 'normcdf' (or, for that matter, 'normpdf',
 % but you had extensive experience with 'randn'.
 nSim = 100000;
 % Normal distribution with a mean of 49 and an sd of 4.6:
-mySimHgts = (randn(nSim,1) .* (9/1.96)) + 49;
-pSim = sum(mySimHgts > 51) / nSim;
+mySimHgts = (randn(nSim,1) .* (CI95/1.96)) + predHgt;
+pSim = sum(mySimHgts > leveeHgt) / nSim;
 
-% or can cheat as use 'normrnd'
-mySimHgts = normrnd(49,9/1.96,nSim,1);
-pSim = sum(mySimHgts > 51) / nSim;
+% Plot the results of our simulation:
+figure, histogram(mySimHgts);
+hold on
+ax = axis;
+hl = line([leveeHgt,leveeHgt],[ax(3),ax(4)]);
+set(hl,'Color','r');
+
+% or can cheat and use 'normrnd'
+mySimHgts = normrnd(predHgt,CI95/1.96,nSim,1);
+pSim = sum(mySimHgts > leveeHgt) / nSim;
 
 % Follow-up (Silver's book): "In fact, the river crested to fifty-four
 % feet."
 
-% QUESTION 2: What is the probability if the "margin of error" corresponds
+%% QUESTION 2: What is the probability if the "margin of error" corresponds
 % to the standard error?
 
 p3 = normcdf(51,49,9,'upper');

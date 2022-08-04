@@ -57,9 +57,7 @@ for k = 1:nSims
     % than 'x'. This works out so that the positions in 't' correspond to
     % the ends of a given streak. However, if you specify the 'shape'
     % parameter as 'same', then the indices in 't' will correspond to the
-    % next-to-last position in the streak. You just have to be careful
-    % about the indexing so that you will correctly identify the value of
-    % the shot that follows a given streak.
+    % next-to-last position in the streak
     w = conv(x,u);
     
     % Different ways to do sampling: biased vs. "inverse sampling"
