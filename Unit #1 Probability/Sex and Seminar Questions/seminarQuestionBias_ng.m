@@ -1,4 +1,4 @@
-% seminarQuestionBias.m
+% seminarQuestionBias_ng.m
 %
 % Do women ask more questions at a seminar if a woman asks the 1st question?
 % 

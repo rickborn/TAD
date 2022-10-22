@@ -17,7 +17,8 @@ jitterX = (rand(length(ds.Hgt),1) .* jFactor) - (jFactor/2);
 % We want to use actual height for regression, but jittered height for
 % plotting:
 jHgt = ds.Hgt+jitterX;
-plot(jHgt, ds.Income, 'b.');
+hp = plot(jHgt, ds.Income, 'b.');
+set(hp,'MarkerSize',10);
 hold on
 % draw the least-squares regression line:
 hl = lsline;
@@ -25,6 +26,10 @@ set(hl,'Color','k','LineWidth',2);
 xlabel('Height (inches)');
 ylabel('Income (thousands of $)');
 x = xlim;
+
+set(gca,'FontSize',12);
+r = corrcoef(ds.Hgt,ds.Income);
+text(57,110,['r = ' num2str(r(2,1),2)],'FontSize',14);
 
 %% Do simple regression
 modelspec1 = 'Income ~ Hgt';
@@ -75,6 +80,7 @@ pWrongDirection = sum(allSlopes < 0) / nBoot;
 %% Lurking variable: sex
 % men taller than women and make more $$$
 
+figure;
 ds.Male = logical(ds.Male);
 h1 = plot(jHgt(ds.Male),ds.Income(ds.Male),'k+');
 h2 = plot(jHgt(~ds.Male),ds.Income(~ds.Male),'ro');
@@ -89,13 +95,18 @@ mdl2 = fitglm(ds,modelspec2,'Distribution','normal');
 
 % re-plot original data:
 figure
-plot(jHgt, ds.Income, 'b.');
+hp = plot(jHgt, ds.Income, 'b.');
+set(hp,'MarkerSize',10);
 hold on
 h1 = plot(jHgt(ds.Male),ds.Income(ds.Male),'ks');
 h2 = plot(jHgt(~ds.Male),ds.Income(~ds.Male),'ro');
 %legend([h1,h2],{'Male','Female'},'Location','NorthWest');
 xlabel('Height (inches)');
 ylabel('Income (thousands of $)');
+
+set(gca,'FontSize',12);
+%r = corrcoef(ds.Hgt(~ds.Male),ds.Income(~ds.Male));
+%text(57,110,['r = ' num2str(r(2,1),2)],'FontSize',14);
 
 %% Get predictions and CIs for men:
 
@@ -116,3 +127,37 @@ plot(xVals,yWomenCI(:,1),'r--');
 plot(xVals,yWomenCI(:,2),'r--');
 
 legend([h1,h2],{'Male','Female'},'Location','NorthWest');
+
+%% Bonus: Included-variable bias:
+
+% Inspired by: 
+% Jung, J., Corbett-Davies, S., Shroff, R. and Goel, S., 2018. Omitted and
+% included variable bias in tests for disparate impact. arXiv preprint
+% arXiv:1809.05651.
+
+% If we include a "proxy" variable--in this case, "voice register"--what
+% happens to our coefficient for sex?
+
+fileName = 'IncomeByHgtData2.xlsx';
+ds2 = readtable(fileName);
+
+% Recode to make 'S' and 'A' into 'hi' and 'T' and 'B' into 'lo'
+ds2.Voice = categorical(ds2.Voice);
+ds2.Voice(ds2.Voice == 'S' | ds2.Voice == 'A') = 'high';
+ds2.Voice(ds2.Voice == 'T' | ds2.Voice == 'B') = 'low';
+ds2.Voice = categorical(ds2.Voice);
+
+% Now fit the model:
+modelspec3 = 'Income ~ Hgt + Male + Voice';
+mdl3 = fitglm(ds2,modelspec3,'Distribution','normal');
+%[b3,dev3,stats3] = glmfit([ds2.Hgt,ds2.Male,ds2.Voice],ds2.Income);
+
+%% Create a data set with vocal ranges of 'S,A,T,B'
+
+% Add another column that correlates with sex: voice = S,A,T,B
+t1 = randi([3,4],100,1);    % men are 'tenor' or 'bass'
+t2 = randi([1,2],100,1);    % women are 'soprano' or 'alto'
+ds.Voice(ds.Male == 1) = t1;
+ds.Voice(ds.Male == 0) = t2;
+ds.Voice = categorical(ds.Voice,[1,2,3,4],{'S','A','T','B'});
+writetable(ds,'incomeByHgtData2.xlsx');

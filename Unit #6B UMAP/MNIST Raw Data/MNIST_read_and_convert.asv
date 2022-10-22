@@ -1,0 +1,34 @@
+% MNIST_read_and_convert.m
+%
+% RTB wrote it, 22 September 2022, for use with Jonah Pearl's UMAP exercise
+
+% Download the MNIST files from http://yann.lecun.com/exdb/mnist/ and load
+% the data set into the workspace. To load the data from the files as
+% MATLAB arrays, place the files in the working directory, then use the
+% helper functions processImagesMNIST and processLabelsMNIST
+
+% NOTE: I had to first use 7zip to uncompress the gz files, then use the
+% names of the uncompressed files. I also had to re-write the file that
+% reads in and converts the data files.
+
+% Names of data files:
+filenameImagesTrain = 'train-images.idx3-ubyte';
+filenameLabelsTrain = 'train-labels.idx1-ubyte';
+filenameImagesTest = 't10k-images.idx3-ubyte';
+filenameLabelsTest = 't10k-labels.idx1-ubyte';
+
+% Open, read and convert to MATLAB arrays:
+XTrain = myProcessImagesMNIST(filenameImagesTrain);
+YTrain = myProcessLabelsMNIST(filenameLabelsTrain);
+XTest = myProcessImagesMNIST(filenameImagesTest);
+YTest = myProcessLabelsMNIST(filenameLabelsTest);
+
+% Reality check: Plot sample of digits
+k = 0;
+for k1 = 1:3
+    for k2 = 1:3
+        k = k + 1;
+        subplot(k1,k2,k);
+        imshow(reshape(XTrain(k, :),28,28))
+        
+

@@ -25,7 +25,9 @@ function [D,pHgH,pHgM] = GVTsim(nShots,kStreak,pHit,nSims,inverseSampleFlag,pFla
 % Psychology, 17: 295-314.
 % 
 % This is a really nice simulation of a subtle counting bias that went
-% undetected for >30 years.
+% undetected for >30 years. Perhaps the moral of the story is that any time
+% you condition on 'strange things' (i.e. streaks), you can distort the
+% sample space and introduce bias.
 % 
 % RTB wrote it, 09 November 2018, airplane trip from San Diego to Boston
 
@@ -41,12 +43,16 @@ rng shuffle
 
 % init variables to hold results of simulations:
 D = zeros(nSims,1);
-pHgH = zeros(nSims,1);
-pHgM = zeros(nSims,1);
+pHgH = D;
+pHgM = D;
 % filter for use with 'conv' to detect streaks of length kStreak
 u = ones(1,kStreak);
 
-for k = 1:nSims
+% It occasionally happens that there will be no streaks (either hits or
+% misses) of length 'k', in which case, we'll just re-generate a new random
+% sequence. This is why I'm using a 'while' loop instead of a 'for' loop.
+k = 1;
+while k <= nSims
     % generate a random sequence of hits/misses:
     x = rand(1,nShots) <= pHit;
     
@@ -72,6 +78,11 @@ for k = 1:nSims
         t = find(w >= kStreak);
     end
     
+    if isempty(t)
+        %warning('No hit streaks of length k')
+        continue;
+    end
+        
     % Need to make sure we don't run off the end. That is, if 'x' ends in a
     % streak, 'conv' will find the last element as the end of a streak. But
     % we can't know the result of the next shot, because there isn't one.
@@ -92,6 +103,11 @@ for k = 1:nSims
         t = find(w >= kStreak);
     end
     
+    if isempty(t)
+        %warning('No miss streaks of length k')
+        continue;
+    end
+        
     if max(t) == length(x)
         t = t(1:end-1);
     end
@@ -101,6 +117,7 @@ for k = 1:nSims
     % Gilovich et al. calculated the difference, which should be 0 under
     % the null hypothesis:
     D(k) = pHitGivenKhits - pHitGivenKmisses;
+    k = k + 1;
 end
 
 if pFlag
@@ -109,8 +126,8 @@ if pFlag
     xlabel(['P(Hit|',num2str(kStreak),' hits) - P(Hit|',num2str(kStreak),' misses)']);
     set(gca,'Fontsize',14);
     % draw vertical lines for the mean and the median:
-    Dmean = mean(D,'omitnan');
-    Dmedian = median(D,'omitnan');
+    Dmean = mean(D);
+    Dmedian = median(D);
     ax = axis;
     h1 = line([Dmean,Dmean],[ax(3),ax(4)],'Color',[0.7,0.2,0]);
     h2 = line([Dmedian,Dmedian],[ax(3),ax(4)],'Color',[0,0.7,0.2]);

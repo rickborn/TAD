@@ -7,7 +7,7 @@
 
 %% Generate some fake data for GPA and GRE scores that are uncorrelated:
 
-nApps = 100;    % # of applications to grad school
+nApps = 200;    % # of applications to grad school
 
 % GPAs, uniformly distributed over [2,4):
 gpa = (rand(nApps,1) .* 2) + 2;

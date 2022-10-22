@@ -1,10 +1,11 @@
 % plotMany.m
 %
-% estimate GVT bias as a function of n and k
+% estimate GVT bias as a function of sample size, n, and streak length, k.
 % see GVTsim.m for details
-% adding silly comment
 
+% Sample size
 allN = [50,100,200,500];
+% Streak length
 allK = [1,2,3];
 
 allDmean = zeros(length(allK),length(allN));

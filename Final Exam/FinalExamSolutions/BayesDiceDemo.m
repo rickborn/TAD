@@ -12,7 +12,7 @@
 % Q1: Which of the 5 dice did she most likely choose?
 nSides = [4,6,8,12,20];
 nDice = 5;
-% start with a uniform prio: each die was equally likely to have been
+% start with a uniform prior: each die was equally likely to have been
 % selected:
 prior1 = ones(1,nDice) ./ nDice;
 % Probability of rolling a '5' given each die's hypothesis:
