@@ -18,8 +18,7 @@
 % excel spreadsheet so the students would not spend time having to figure
 % this out.
 fileName='candy-production-by-season.xlsx';
-% As a reality check, I also generated some H0 data:
-%fileName='candy-production-by-season-null.xlsx';
+
 ds = readtable(fileName);
 
 %seasonSums = [ds.Winter, ds.Spring, ds.Summer, ds.Fall];
@@ -98,6 +97,7 @@ pF = fcdf(F,dfB,dfW,'upper');
 
 % Calculate the intra-cluster correlation:
 ICC_season = varB / (varB + varW);
+    
 
 %% Does candy production differ by season? Permutation test
 
