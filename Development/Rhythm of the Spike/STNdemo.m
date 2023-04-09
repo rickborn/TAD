@@ -16,6 +16,7 @@
 % 2. ISI histograms
 % 3. Autocorrelation plots
 % 4. Spectral estimators for point processes
+%    (This requires the Chronux toolbox from chronux.org)
 % 5. History-dependent GLM
 % 6. Basis functions for smooth co-variates
 % 7. Model selection using AIC, KS plots, analysis of residuals
@@ -189,7 +190,7 @@ title('Movement period');
 % duration, so we can achieve a 4 Hz frequency resolution by setting the
 % time-bandwidth product to 4.
 TW = 4;						%Choose time-bandwidth product of 4.
-nTapers=2*TW-1;				%...which sets the # of tapers.
+nTapers=(2*TW)-1;           %...which sets the # of tapers.
 params.Fs=1000;				%Define sampling frequency,
 params.tapers=[TW,nTapers];	%...time-band product,# tapers.
 params.fpass=[0 500];		%Define frequency range to examine.
@@ -315,7 +316,7 @@ lambda1=exp(b1(1)+b1(2)*iMove);		%Firing rate of Model 1.
 spikeindex=find(y);					%Find spikes,
 N=length(spikeindex);				%...and total # spikes.
 Z(1)=sum(lambda1(1:spikeindex(1)));	%1st rescaled waiting time,
-for i=2:N,							%...and the rest.
+for i=2:N							%...and the rest.
      Z(i)=sum(lambda1(spikeindex(i-1)+1:spikeindex(i)));
 end
 
@@ -570,7 +571,7 @@ end
 
 %% Refining the model: smooth history dependence.
 
-% Do we really believe that the influence of a spike 25 ms in the past can
+% Do we really believe that the influence of a spike 25 ms in the past 
 % can be very different from one 26 ms in the past? If not, it might be
 % better to define a model with fewer free parameters that guarantees a
 % smooth modulation as a function of lag. To do this, we replace the

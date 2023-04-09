@@ -181,6 +181,11 @@ hold on;
 % specification.)
 lme = fitlme(ds,'amount ~ hrs + (1|lot)');
 
+% NOTE: If our dependent measure were, say, Bernoulli (success/failure), we
+% could use 'fitglme' to use the GLM and allow us to specify a
+% 'Distribution' (in this case, 'Binomial') and a link function, 'Link' (in
+% this case, 'logit').
+
 % Now we need to read out the individual intercepts from the model
 betaFit = fixedEffects(lme);           % give us the fixed effects (slope & intercept)
 [~,~,STATS] = randomEffects(lme);      % Compute the random-effects statistics

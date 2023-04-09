@@ -5,6 +5,8 @@ function [maxRuns, nTransitions] = coinTossStatistics(nTosses,nSims,pFlag)
 %
 % [maxRuns, nTransitions] = coinTossStatistics(nTosses,nSims,pFlag)
 %
+% e.g. [maxRuns, nTransitions] = coinTossStatistics(100,2000,1);
+%
 % Inputs:
 % - nTosses: # of tosses to simulate in each trial (default = 100)
 % - nSims: # of trials to simulate (default = 2000)
@@ -68,10 +70,11 @@ if pFlag
     hold on
     xlabel('Run length'); ylabel('Probability');
     title('Distribution of runs of heads');
-    % Note that we are looking at the probability of getting z heads before
-    % we get one tail, which is the negative binomial distribution with a
-    % parameter of one. In our case, a run of 'one' corresponds to a 'z' of
-    % zero. This is the geometric distribution.
+%     Note that we are looking at the probability of getting z heads before
+%     we get one tail, which is the negative binomial distribution with a
+%     parameter of one. In our case, a run of 'one' corresponds to a 'z' of
+%     zero. This special case of nbinpdf is the geometric distribution:
+%     pGeom = p * (1-p)^(k-1), where p = 0.5 and k is the run length.
     yVals = nbinpdf(binCtrs-1,1,0.5);
     h2=plot(binCtrs,yVals,'ro-','MarkerFaceColor','r');
     
