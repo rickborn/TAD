@@ -73,7 +73,6 @@ ylabel('GPA (science)');
 
 %% TODO: Calculate the mean GRE score for your sample and its standard error (SE)
 % We start with something that is easy to compute directly:
-
 meanGRE = mean(ds15.GRE);
 semGRE = std(ds15.GRE) / sqrt(length(ds15.GRE));
 
