@@ -59,7 +59,7 @@ for jVal = 1:length(nInit)
             allNdx = [nInit(jVal):nAddObs(iVal):nMax];
             for k = 1:length(allNdx)
                 if ttest2(allSims([1:allNdx(k)],1), allSims([1:allNdx(k)],2), ...
-                        'Alpha',myAlpha)
+                        'Alpha',myAlpha, 'Tail', 'both')
                     FP(jSim) = 1;
                     break
                 end
@@ -68,6 +68,17 @@ for jVal = 1:length(nInit)
         FPrate(jVal,iVal) = (sum(FP) / nSims) * 100;
     end
 end
+
+% Interesting wrinkle (26 February 2024; working on METER materials)
+% What would happen if we used a 1-tailed t-test instead of a 2-tailed
+% test? First naive guess: the FP rate would be halved, because now we're
+% only looking in one tail. Better 2nd guess: If we keep the same alpha,
+% we're now giving ourselves more opportunities in that one tail, which
+% would partially compensate. Answer: When I run the simulation with the
+% parameters: 10 initial obs., add 2, stop at 50, I get a FP rate of just
+% over 20% with the 2-tailed test. With a 1-tailed test and the same
+% parameters, I get a FP rate of . . . 17.6%! Much higher than I would have
+% guess naively!
 
 if pFlag
     figure

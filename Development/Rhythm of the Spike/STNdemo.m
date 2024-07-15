@@ -184,6 +184,9 @@ title('Movement period');
 
 % NOTE: To run the following code, one must download and install the
 % Chronux toolbox from chronux.org
+%
+% Make sure that the appropriate directories are added to the path:
+% C:\usr\rick\mat\chronux_2_11
 
 %Set the parameters of the MTM.
 % The planning and movement periods for each trial are one second in
@@ -584,7 +587,7 @@ C = zeros(modelOrd,length(X));
 for i=1:modelOrd		
     C(i,:) = normpdf(X,i,5);
 end
-% To visualize the kernels: plot(C)
+% To visualize the kernels: figure, plot(C)
 
 % The result in C is a [70 x 8] matrix that converts the previous 70-column
 % xHist matrix into a new set of 8 columns to include in the design

@@ -18,7 +18,7 @@ function [maxRuns, nTransitions] = coinTossStatistics(nTosses,nSims,pFlag)
 %
 % from Gelman & Nolan, Teaching Statistics (A Bag of Tricks), 8.3.2, Real
 % vs. fake coin flips. pp. 119-121
-%
+% 
 % Tests students' intuition about random sequences
 % Idea is to divide class in half and have one group generate a sequence of
 % 0s and 1s by actually tossing a coin 100 times and the other to come up with their

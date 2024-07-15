@@ -40,10 +40,7 @@
 % https://benchmarks.ai/mnist. It is generally considered to be an easy
 % problem in machine learning; very simple classifiers perform >90%
 % accurate.
-%
-% For more on the MNIST data set:
-% https://en.wikipedia.org/wiki/MNIST_database
-
+% 
 % Here, we won't bother with classification, but the semantic meaning of
 % the data points as numbers will help us to understand what PCA is doing
 % with the data.
@@ -152,8 +149,45 @@ disp(reconstruction_pca_mse)
 
 plot_MNIST_sample(X_reconstructed,y)
 
-%% Helper functions
+%% Sparse random projections
 
+%{
+Another common technique for performing dimensionality reduction
+(although it is becoming less common as computers get faster) is
+using random projections. Instead of calculating the optimal set 
+of projection axes (i.e. the principal components), we just use
+random ones that happen to have decent statistical properties, on average.
+
+Here, we compare one type of random projections to PCA, based on
+variance explained by the axes of the projections.
+%}
+n_iter = 100;
+max_var_explained = zeros(n_iter,1);
+for i = 1:n_iter
+    srp = get_sparse_random_projection_mat(X, 200);
+    X_rand = X * srp;
+    max_var_explained(i) = max(get_variance_explained(X_rand));
+end
+
+figure()
+histogram(max_var_explained)
+% add other stuff to the plot...
+
+% TODO: QUESTION 7: On average, how many times more/less variance
+% does the best sparse projection component explain than the first
+% principal component?
+variance_ratio = explained_variance(1) / mean(max_var_explained);
+
+%% Reconstruction based on random projections
+n_sparse_dims_to_use = round(variance_ratio * n_pcs_to_use); % Multiply these so that the reconstructions explain roughly similar amounts of variance.
+get_sparse_random_projection_mat(X, n_sparse_dims_to_use);
+X_rand = X * srp;
+X_reconstructed_from_sparse = X_rand * srp' + mean(X, 1);
+plot_MNIST_sample(X_reconstructed_from_sparse, y);
+
+
+
+%% Helper functions
 function counts_pca = get_pca(counts)
     n_pcs = 50;  % (there is a better way to do defaults in MATLAB but I forget how and it's late)
     
@@ -196,6 +230,21 @@ for k = 1:9
     % Need to subtract '1' because the category for '0' is '1', etc.
     title(num2str(uint8(q(k+1)) - 1));
 end
+end
+
+function srp = get_sparse_random_projection_mat(X, n_components)
+% Generate a sparse random projection for the data X (n obs x n vars)
+% See: https://scikit-learn.org/stable/modules/random_projection.html#sparse-random-projection
+
+    % Set some defaults
+    s = sqrt(size(X,2));  % inverse density
+    
+    % Generate the data
+    possible_vals = [-1*sqrt(s/n_components), 0, sqrt(s/n_components)];
+    weights = [0.5/s, 1 - 1/s, 0.5/s];
+    mat_vals = randsample(possible_vals, n_components * size(X,2), true, weights);
+    mat_vals = mat_vals(randperm(length(mat_vals)));  % shuffle
+    srp = reshape(mat_vals, size(X,2), n_components);
 end
 
 function var_explained = get_variance_explained(X)
