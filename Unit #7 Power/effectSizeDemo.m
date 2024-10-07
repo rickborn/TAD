@@ -1,18 +1,18 @@
 % effectSizeDemo.m 
 
 % How likely are we to get a given effect size under H0?
-%
+% 
 % Inspired by a failure-to-listen of Slater Sharp
-%
+% 
 % RTB wrote it, 19 Oct. 2017, gorgeous autumn day
 % RTB added Type S & Type M error calculations, 19 May 2023, Swan's Island
 % at the Hermit Hut, courtesy of East Point Mike
-
+% 
 % For explanation of Type S and Type M errors, see:
 % Gelman, A. and Carlin, J., 2014. Beyond power calculations: Assessing
 % type S (sign) and type M (magnitude) errors. Perspectives on
 % Psychological Science, 9(6), pp.641-651.
-%
+% 
 % see also: retrodesign.m
 
 %% Distribution of d' under H0

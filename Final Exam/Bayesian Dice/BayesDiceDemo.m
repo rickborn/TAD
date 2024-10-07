@@ -1,7 +1,7 @@
 % BayesDiceDemo.m
-%
+% 
 % RTB wrote it, 09 Oct. 2017, rainy Columbus day
-
+% 
 % A brown paper bag contains 5 "Platonic solid" dice, each with a different
 % number of sides: 4-sided, 6-sided, 8-sided, 12-sided and 20-sided. The
 % sides of each die are numbered 1:n, where n is the number of sides, and
