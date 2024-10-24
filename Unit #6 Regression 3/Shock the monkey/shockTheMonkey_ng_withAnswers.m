@@ -53,7 +53,7 @@ ds.Properties.VariableNames
 %% Plot the data
 
 % Option to plot 3 separate figures or all 3 plots in one:
-oneFigFlag = 1;
+oneFigFlag = 0;
 if oneFigFlag
     main = figure('Position',[50 10 600 900],'Name','Shock the Monkey');
     subplot(3,1,1)

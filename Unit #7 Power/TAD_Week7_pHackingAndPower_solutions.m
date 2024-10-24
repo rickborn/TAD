@@ -4,7 +4,7 @@
 % week #7.
 %
 % RTB created this file on 19 September 2018
-% Updated by RTB on 19 October 2019
+% Updated by RTB on 21 October 2024
 
 %% QUESTION (Q1)
 
@@ -50,6 +50,7 @@ for jSim = 1:nSims
     end
 end
 FPrate = (sum(FP) / nSims) * 100;
+display(FPrate);
 % ANSWER for nAddObs/nMax = 10/100: 16.73, which rounds to 17
 % ANSWER for nAddObs/nMax = 5/50: 13.4
 
@@ -80,7 +81,8 @@ FPrate = (sum(FP) / nSims) * 100;
 desiredPower = 0.80;
 dPrimeSim = 0.4;
 % In this case, we can use the formula:
-n = sampsizepwr('t2',[0,1],dPrimeSim,desiredPower);
+n = sampsizepwr('t2',[1,1],1+dPrimeSim,desiredPower);
+display(n);
 % ANSWER: 100
 
 % But we could also get an answer via simulation:
@@ -133,7 +135,7 @@ grid on
 dPrime = 0.40:0.001:1;
 pwrout = sampsizepwr('t2',[0,1],dPrime,[],30);
 dPrimeCrit = mean(dPrime(pwrout > 0.79 & pwrout < 0.81));
-
+display(dPrimeCrit);
 % ANSWER: 0.736
 
 %% QUESTION (Q4)
