@@ -241,6 +241,7 @@ allSamples = randn(n,2,nSims);
 allSamples(:,2,:) = allSamples(:,2,:) + dPrimeSim;
 
 % Now calculate our actual d-primes (spread due to sampling error)
+% 'squeeze' gets rid of dimensions of length 1
 allDprime = squeeze(diff(mean(allSamples)));    % SD = 1
 
 % and then run our t-test to see who gets published:

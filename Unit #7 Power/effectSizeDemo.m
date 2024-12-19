@@ -92,7 +92,7 @@ gold = [0.9290, 0.6940, 0.1250];
 % Cohen suggested that d=0.2 be considered a 'small' effect size, 0.5
 % represents a 'medium' effect size and 0.8 a 'large' effect size.
 alpha = 0.05;   % criterion for significance
-trueEffectSize = 0.2;
+trueEffectSize = 0.5;
 
 % Make plots?
 pFlag = 1;

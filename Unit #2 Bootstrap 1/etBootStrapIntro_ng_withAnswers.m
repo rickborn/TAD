@@ -529,3 +529,36 @@ l4=line([rho_z95CIlow,rho_z95CIlow],[bsAxis(3),bsAxis(4)],'Color',[0,0.5,0],'Lin
 line([rho_z95CIhi,rho_z95CIhi],[bsAxis(3),bsAxis(4)],'Color',[0,0.5,0],'LineWidth',2);
 
 legend([l1 l2 l3 l4],{'Nl. approx.','Percentile','BCA','Z trans'},'Location','Northwest');
+
+%% Bonus: Does conditioning on a collider reduce the existing correlation?
+
+% Decide who gets accepted: 
+% normalize each metric, add them together, then accept the top half
+nlGPA = (ds82.GPA - min(ds82.GPA)) ./ (max(ds82.GPA) - min(ds82.GPA));
+nlGRE = (ds82.GRE - min(ds82.GRE)) ./ (max(ds82.GRE) - min(ds82.GRE));
+totScore = nlGPA + nlGRE;
+% accepted = totScore > median(totScore);
+
+% Perhaps we want to be more selective. Let's calculate several quantiles:
+y = quantile(totScore,[0.025 0.25 0.50 0.75 0.975]);
+% Accept only those in the top quartile:
+accepted = totScore > y(4);
+
+% Now compare the correlations between those accepted and the total:
+% total corr is stored in 'rhoHat82' (0.76)
+
+rhoAccepted = corr(ds82.GRE(accepted),ds82.GPA(accepted));
+display(rhoAccepted);
+
+% plot it
+figure(1); subplot(3,1,1);
+hold on
+plot(ds82.GRE(accepted),ds82.GPA(accepted),'bs');
+
+% plot least squares regression line for each data set
+lsline
+legend('Census','Sample','Sample','Census','Accepted','Location','NorthWest');
+
+% The bottom line is that the more selective you are, the bigger the
+% negative correlation you introduce by conditioning on those who were
+% accepted.
