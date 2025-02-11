@@ -165,7 +165,7 @@ hold on;
 % intercept for each lot.
 
 % NOTE: MATLAB online help:
-% https://www.mathworks.com/help/stats/relationship-between-formula-and-design-matrix-.html
+% https://www.mathworks.com/help/stats/wilkinson-notation.html
 % https://www.mathworks.com/help/stats/fitlme.html
 % The formula for the model is expressed in Wilkinson notation.
 % In general, a formula for model specification is a character vector of
@@ -287,7 +287,7 @@ plot(xVals,yVals,'g-');
 % regression:
 % 1) independence (each point in scatter plot is independent of others)
 % 2) linearity: relationship between x & y is linear
-% 3) homoscedasticity of residuals: residuals, ?i, have the same variance
+% 3) homoscedasticity of residuals: residuals have the same variance
 % 4) normality of the residuals
 
 % We'll look at two measures:

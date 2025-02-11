@@ -3,9 +3,9 @@
 % generate a binomial distribution. Watch this short video to see how it
 % works: https://www.youtube.com/watch?v=6YDHBFVIvIs
 % 
-% Use MATLAB to simulate 1000 balls going through a Galton board with 16
+% Use MATLAB to simulate 10,000 balls going through a Galton board with 16
 % rows of pins. Post a figure showing their final distribution.
-%
+% 
 % RTB wrote it, 01 August 2017, hot summer day listening to Tales from
 % Topographic Oceans
 
@@ -21,7 +21,7 @@ nBalls = 100000;
 % It can all be done with a single line of code. It's a good test of your
 % MATLAB knowledge to try to parse such lines, but it's a terrible thing to
 % do in practice. Why?
-rng default
+rng shuffle
 numRightTurns = sum(round(rand(nRowsOfPins,nBalls)));
 
 % Plot a histogram
@@ -38,11 +38,13 @@ ylabel('# of Balls');
 % 
 % Q2: Use 'binopdf' to calculate the probability of getting a ball in the
 % middle bin (i.e. it makes 8 right and 8 left turns, in any order).
-x=8; n=16; p=0.5;
+x=nRowsOfPins/2; n=nRowsOfPins; p=0.5;
 pBino = binopdf(x,n,p); % 0.1964
+bino_err = 0;   % by definition
 
 % Q3: Use 'normpdf' to make the same calculation
 pNorm = normpdf(x,n*p,sqrt(n*p*(1-p))); % 0.1995
+norm_err = (abs(pNorm - pBino) / pBino) * 100;
 
 % Q4: Which number is more accurate?
 % Ans: The binomial probability is exact; the normal is an approximation
@@ -52,5 +54,10 @@ pNorm = normpdf(x,n*p,sqrt(n*p*(1-p))); % 0.1995
 % Q5: What is your estimate of the same probability based on your
 % simulation?
 pSim = sum(numRightTurns == x) / nBalls;
+sim_err = (abs(pSim - pBino) / pBino) * 100;
 
-
+% Show it pretty:
+T = table([pBino;pNorm;pSim],[bino_err;norm_err;sim_err],...
+    'VariableNames',{'Probability','% Error'},...
+    'RowNames',{'Binomial','Normal','Simulation'});
+display(T);

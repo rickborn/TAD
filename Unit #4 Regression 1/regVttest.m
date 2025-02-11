@@ -32,7 +32,7 @@ nFemale = sum(~ds.male);
 
 %% Make a boxplot of the bpf broken down by gender
 
-figure
+figure('Position',[10 10 500 900]);
 subplot(3,1,1);
 boxplot(ds.bpf,ds.male);
 hold on
@@ -40,16 +40,16 @@ hold on
 ylabel('brain parenchymal fraction');
 set(gca,'XTickLabel',['F';'M'])
 
+% Superimpose raw data on the box plots
+% To do this, we need to know the numeric values associated with the two
+% groups. This can be obtained using the 'gca' command
+xVals = get(gca,'XTick');
+
 % Add mean +/- sem
 semMale = std(ds.bpf(ds.male)) / sqrt(nMale);
 semFemale = std(ds.bpf(~ds.male)) / sqrt(nFemale);
 he = errorbar(xVals,[mean(ds.bpf(~ds.male)),mean(ds.bpf(ds.male))],[semFemale,semMale],'rs');
 set(he,'LineWidth',2,'MarkerSize',10,'MarkerFaceColor','r');
-
-% Superimpose raw data on the box plots
-% To do this, we need to know the numeric values associated with the two
-% groups. This can be obtained using the 'gca' command
-xVals = get(gca,'XTick');
 
 % To prevent nearby values from superimposing, we can jitter the data along
 % the x-axis. If we don't jitter too much, it will still be clear to which
@@ -61,6 +61,9 @@ plot((ones(1,nFemale) .* xVals(1)) + (randn(1,nFemale).*jFactor),ds.bpf(~ds.male
 %% Compare bpf of men vs. women using a 2-sample t-test
 
 [h,p,ci,tStats] = ttest2(ds.bpf(ds.male),ds.bpf(~ds.male));
+fprintf('p-value: %.5f\n',p);
+fprintf('95%% CI: [%.4f, %.4f]\n',ci(1),ci(2));
+%disp(tStats);
 
 %% Compare bpf of men vs. women using linear regression
 
@@ -69,6 +72,8 @@ const = ones(length(ds.bpf),1);
 
 modelSpec = 'bpf ~ male';
 mdl1 = fitglm(ds,modelSpec,'Distribution','normal');
+
+disp(mdl1);
 
 %% Plot the regression line
 
