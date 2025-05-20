@@ -1,8 +1,8 @@
-function [y,y1D] = JSestimator(x,N)
+function [y] = JSestimator(x,N)
 
 % JSestimator.m: The James-Stein empirical Bayes estimator, from Efron
 %
-% y = muJS(x,N,pFlag)
+% y = muJS(x,N)
 %
 % Inputs:
 % - x, a vector of the individual means for a number of samples
@@ -11,7 +11,10 @@ function [y,y1D] = JSestimator(x,N)
 % Outputs:
 % - y, the James-Stein empirical Bayes estimator
 %
-% see pp. 6-7 of Efron 2010
+
+% see pp. 6-7 of Efron, B. (2010). Large-Scale Inference: Empirical Bayes
+% Methods for Estimation, Testing and Prediction. Cambridge: Cambridge
+% University Press.
 %
 % RTB wrote it, 10 Feb. 2014 (plane to SPC Study Section in San Francisco)
 
