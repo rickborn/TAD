@@ -164,7 +164,7 @@ pFP = nFP / nSim;
 
 % A21: There are two different ways to answer this question. The simplest
 % is to just generate a new covariance matrix and repeat our simulation:
-mySigma = eye(5);   % and repeat lines 119-130
+mySigma = eye(5);   % and repeat lines 147-158
 % This gives 0.2279
 
 % But it is easy to calculate exactly with independent tests, since the
@@ -182,3 +182,47 @@ mySigma = ones(5,5);    % and repeat lines 119-130
 % (Brian Healy gave an example in his multiple comparisons lecture of
 % comparing heights between two groups, but coding the heights (single
 % measurement) in five different ways: cm., in., ft., m., yds.
+
+%% Bonus: Probability of one or more FP as a function of correlations:
+
+rng shuffle
+nSim = 10000;
+
+nTests = 5;             % # of t-tests performed
+myAlpha = 0.05;         % criterion for significance
+nSamp = 20;             % number per group
+FWERuncorr = 1 - ((1 - myAlpha)^nTests);
+muCtrl = zeros(1,nTests);   % normalized mean of control group
+allCorr = [0:0.1:1];
+allFP = zeros(size(allCorr));
+
+for n = 1:length(allCorr)
+    myCorr = allCorr(n);   % correlation among tests
+    % covariance matrix:
+    mySigma = (ones(nTests,nTests) .* myCorr) + (eye(nTests) .* (1 - myCorr));
+    
+    nFP = 0;
+    for k = 1:nSim
+        R1 = mvnrnd(muCtrl,mySigma,nSamp);
+        R2 = mvnrnd(muCtrl,mySigma,nSamp);
+        H = ttest2(R1,R2,'Alpha',myAlpha);
+        if any(H)
+            nFP = nFP + 1;
+        end
+    end
+    allFP(n) = nFP / nSim;
+end
+
+% plot the results of our simulations:
+figure, plot(allCorr,allFP,'ro-','LineWidth',2,'MarkerFaceColor','r');
+xlabel('Average correlation among tests');
+ylabel('FWER');
+title([num2str(nTests), ' tests, ' num2str(nSamp), ' samples, alpha = ', num2str(myAlpha)]);
+
+% Draw horizontal lines at 'myAlpha' and 'FWERuncorr':
+maxY = myAlpha * nTests;
+minY = 0;
+axis([min(allCorr), max(allCorr), minY, maxY]);
+ax = axis;
+line([ax(1), ax(2)], [FWERuncorr, FWERuncorr], 'Color', 'k', 'LineStyle', '--');
+line([ax(1), ax(2)], [myAlpha, myAlpha], 'Color', 'k', 'LineStyle', '--');
