@@ -1,7 +1,21 @@
-function [p,lme1] = lme_BFM(fileName)
+function [p,lme1,lme2,cv1,cv2] = lme_BFM(fileName)
 
 % lme_BFM.m: linear mixed-effects model of bodyfat/menarche data
 %
+% [p,lme1,lme2] = lme_BFM(fileName)
+%
+% e.g. [p,M1,M2,cv] = lme_BFM('bodyfat.xlsx')
+%
+% Inputs:
+% - fileName: Excel file containing data
+%
+% Outputs:
+% - p: p-value for the critical test of our H0
+% - lme1: mixed-effects model fit by Garrett Fitzmaurice
+% - lme2: mixed-effects model fit in Naumova et al. 2001
+% - covar1: the covariance matrix for the random effects for model #1
+% - covar2: the covariance matrix for the random effects for model #1
+% 
 % This example is from:
 %
 % Naumova, E.N., Must, A. and Laird, N.M., 2001. Tutorial in biostatistics:
@@ -15,7 +29,7 @@ function [p,lme1] = lme_BFM(fileName)
 % 'Biostatistics-Lecture_Notes-RTB.docx', sections 25.7 to 25.10 for
 % details
 %
-% RTB wrote it, June 3, 2025; putting up mainsail with David Cardozo
+% RTB wrote it, June 3, 2025; bending sails (jib + mainsail) with David Cardozo
 
 % Scientific question: Does the rate of body fat accumulation in girls
 % change at menarche?
@@ -48,7 +62,7 @@ function [p,lme1] = lme_BFM(fileName)
 % We will fit a piece-wise linear model to the data, with the 'knot' or
 % 'hinge' at the time of menarche ('time' = 0). This means that there will
 % be a slope before menarche and a slope after menarche. We'll also allow
-% for random effects for both slope and y-intercept.
+% for random effects for both slopes and for the y-intercept.
 
 %% Defaults
 if nargin < 1, fileName = 'bodyfat.xlsx'; end
@@ -61,11 +75,26 @@ ds = readtable(fileName);
 %% Gather some information
 allIDs = unique(ds.id);
 nGirls = length(allIDs);
+% The 2 examples used in lecture 25 by GF were #16 and #4
+exampleGirls = [16,4];
+
+%% Distribution of numbers of measurments for different girls
+% illustrates that the data are highly unbalanced
+allMs = zeros(nGirls,1);
+for k = 1:nGirls
+    allMs(k) = max(ds.occasion(ds.id == k));
+end
+figure('Name','Unbalanced data');
+histogram(allMs);
+xlabel('Total number of measurements');
+ylabel('Number of subjects');
+title('Compare with Table 1 of Naumova et al. 2001');
 
 %% Spaghetti plot of all the data
 
 % Label the figure with the name of the Excel file:
 figName = fileName(1:strfind(fileName,'.')-1);
+figName = [figName, ' data analysis'];
 f1 = figure('Name',figName,'Position',[50 450 1200 400]);
 myMap = colormap('lines');
 subplot(1,2,1)
@@ -73,9 +102,12 @@ subplot(1,2,1)
 % It doesn't look like 'gscatter' will connect with lines, so we'll have to
 % do it with a 'for' loop
 for k = 1:nGirls
-    plot(ds.time(ds.id == k),ds.pbf(ds.id == k),'Color',myMap(k,:),...
+    h = plot(ds.time(ds.id == k),ds.pbf(ds.id == k),'Color',myMap(k,:),...
         'Marker','.','LineStyle','-');
     hold on
+    if any(k == exampleGirls)
+        set(h,'Marker','^','MarkerFaceColor',myMap(k,:),'LineWidth',1.5);
+    end
 end
 
 %% Fit data with a smoothing spline
@@ -127,10 +159,51 @@ ds.posTime(ds.posTime <= 0) = 0;
 
 %% Fit the linear mixed-effects model
 
-lme1 = fitlme(ds,'pbf ~ time + posTime + (1|id) + (time-1|id) + (posTime-1|id)');
-
+% The first way I tried it was wrong. When the random effects are specified
+% as separate parentheticals separated by '+' signs, the model assumes the
+% random effects are uncorrelated.
+% Wrong way:
+% lme1 = fitlme(ds,'pbf ~ time + posTime + (1|id) + (time-1|id) + (posTime-1|id)');
+% Right way:
+lme1 = fitlme(ds,'pbf ~ time + posTime + (1 + time + posTime|id)');
 % The main p-value of interest is for the fixed of 'posTime'
 p = lme1.Coefficients.pValue(3);
+
+%% Extract the covariance matrix for the random effects:
+psi = covarianceParameters(lme1);
+cv1 = psi{1};
+% The main diagonal gives the variances of the 3 random effects
+% Off-diagonals are covariances between pairs of random effects
+
+% NOTE: It's easy to convert the covariance matrix to give 1) the standard
+% deviations (sqrt of the variances on the main diagonal and 2) the
+% correlation matrix:
+% [sd,corr] = cov2corr(covar);
+
+%% Second model, as instantiated in Naumova et al. 2001
+% See p. 1336. They used a slightly different way of coding time w/r/t
+% menarche. Essentially they created a 'pre-time' and a 'post-time' so that
+% the 2 slopes would correspond to the pre- and post-menarchal slopes
+% directly. In our first approach, the post-menarchal slope was (B2+B3).
+
+% indicator variable that is '1' for ds.time < 0:
+indPre = ds.time < 0;
+ds.preTime = ds.time .* indPre;
+ds.postTime = ds.time .* ~indPre;
+
+lme2 = fitlme(ds,'pbf ~ preTime + postTime + (1+preTime+postTime|id)');
+
+% extract covariance matrix for the random effects:
+psi = covarianceParameters(lme2);
+cv2 = psi{1};
+% results are identical:
+% For model 1, b2 + b3 = 2.4640 (post-menarchal slope)
+% For model 2, b3 = 2.4640 (post-menarchal slope)
+
+% NOTE: I think model #1 is more elegant, since its 'b3' represents the
+% *difference* in the pre-post slopes, and therefore allows us to directly
+% test our H0 that there is no difference after menarche. We can
+% definitively reject H0 (p = 9 x 10^-27).
 
 %% Plot the fixed effects fit
 
@@ -149,9 +222,6 @@ legend([hSpline,hFit],{'Smoothing spline','Model fit'},'Location','Northwest');
 
 %% Plots for example subjects
 
-% The 2 examples used in lecture 25 by GF were #16 and #4
-exampleGirls = [16,4];
-
 % first figure
 figure(f1); subplot(1,2,2);
 
@@ -161,9 +231,6 @@ hold on
 plot(xPos,yPos,'Color','k','LineStyle','-','LineWidth',2);
 
 for m = 1:length(exampleGirls)
-    % select a random girl
-    %thisGirl = randi(nGirls);
-    % example #1 used by GM:
     thisGirl = exampleGirls(m);
     T = ds(ds.id == thisGirl,:);
     
@@ -187,10 +254,9 @@ for m = 1:length(exampleGirls)
     % Plot the BLUP for this girl:
     % First find the random effects for this girl
     [~,~,stats] = randomEffects(lme1);
-    bRE = zeros(size(bFix));
-    for k = 1:length(bFix)
-        bRE(k,1) = stats(((k-1)*nGirls)+thisGirl,4);
-    end
+    % Find appropriate rows in 'stats':
+    L = strcmp(num2str(thisGirl),stats.Level);
+    bRE = stats.Estimate(L);
     % add to the fixed effects:
     bBLUP = bFix + bRE;
     yNeg = bBLUP(1) + (xNeg .* bBLUP(2));
