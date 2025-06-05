@@ -1,10 +1,10 @@
-function [p,lme1,lme2,cv1,cv2] = lme_BFM(fileName)
+function [p,lme1,lme2,lme3,cv1,cv2,corr_rm] = lme_BFM(fileName)
 
 % lme_BFM.m: linear mixed-effects model of bodyfat/menarche data
 %
-% [p,lme1,lme2] = lme_BFM(fileName)
+% [p,lme1,lme2,lme3,cv1,cv2,corr_rm] = lme_BFM(fileName)
 %
-% e.g. [p,M1,M2,cv] = lme_BFM('bodyfat.xlsx')
+% e.g. [p,M1,M2,M3,cv1,cv2,corr_rm] = lme_BFM('bodyfat.xlsx')
 %
 % Inputs:
 % - fileName: Excel file containing data
@@ -13,8 +13,10 @@ function [p,lme1,lme2,cv1,cv2] = lme_BFM(fileName)
 % - p: p-value for the critical test of our H0
 % - lme1: mixed-effects model fit by Garrett Fitzmaurice
 % - lme2: mixed-effects model fit in Naumova et al. 2001
-% - covar1: the covariance matrix for the random effects for model #1
-% - covar2: the covariance matrix for the random effects for model #1
+% - lme3: includes a quadratic term for the post-menarcheal slope
+% - cv1: the covariance matrix for the random effects for model #1
+% - cv2: the covariance matrix for the random effects for model #2
+% - corr_rm: correlation matrix for the repeated measurements
 % 
 % This example is from:
 %
@@ -90,6 +92,75 @@ xlabel('Total number of measurements');
 ylabel('Number of subjects');
 title('Compare with Table 1 of Naumova et al. 2001');
 
+%% Try to look at correlations among repeated measurments.
+% To do this in MATLAB, I think we need to create a new table and use the
+% 'fitrm' function to do this. See the example using 'longitudinalData.mat'
+%
+% It appears that the data need to be in a wide format table, where each
+% row is one subject, and the columns correspond to the repeated measures.
+% We'll use the age of menarche ('agem') as a kind of bogus predictor
+% variable.
+startTime = -2;
+stopTime = 2;
+
+newVarNames = {'id','agem','t2pre','t1pre','t0','t1post','t2post'};
+dsWide = table('Size',[nGirls,length(newVarNames)],...
+    'VariableTypes',{'categorical','doubleNaN','doubleNaN','doubleNaN',...
+    'doubleNaN','doubleNaN','doubleNaN'},...
+    'VariableNames',newVarNames);
+
+% Need a template for finding the correct column in the new table:
+Time = startTime:1:stopTime;  % within subjects variable
+offset = 2;     % there are two columns before the time columns start
+
+% Need to convert 'time' values to integers for matching
+ds.timeInt = round(ds.time);
+
+% Now loop through original table and populate the wide table:
+for k = 1:nGirls
+    thisT = ds(ds.id == k,:);
+    dsWide.id(k) = categorical(thisT.id(1));
+    dsWide.agem(k) = thisT.agem(1);
+    for m = 1: height(thisT)
+        thisCol = find(thisT.timeInt(m) == Time) + offset;
+        dsWide{k,thisCol} = thisT.pbf(m);
+    end
+end
+
+%% Try removing any rows that contain 'NaN's
+% pruneFlag = 1;
+% if pruneFlag
+%     L = any(isnan(table2array(dsWide(:,3:end))),2);
+%     dsPruned = dsWide(~L,:);
+% else
+%     dsPruned = dsWide;
+% end
+% I get the exact same covariance matrix in the analysis in the cell below
+% whether or not I remove any rows containing missing data ('NaN'). This
+% tells me that the 'fitrm' function automatically ignores any rows
+% containing missing data. Bummer.
+
+%% Get the covariance using the 'fitrm' function
+
+rm = fitrm(dsWide,'t2pre-t2post ~ agem','WithinDesign',Time,'WithinModel','separatemeans');
+cv = table2array(rm.Covariance);
+[~,c_rm] = cov2corr(cv);
+%disp(cor);
+
+% Make the main diagonal the variances:
+c_rm(logical(eye(length(cv)))) = diag(cv);
+
+% Convert it back to a table:
+corr_rm = array2table(c_rm,...
+    'VariableNames',{'t2pre','t1pre','t0','t1post','t2post'},...
+    'RowNames',{'t2pre','t1pre','t0','t1post','t2post'});
+
+% This looks close, but not exactly what GF got.
+% And now I know why: the experiment in the cell above with pruning reveals
+% that 'fitrm' ignores any observations that contain NaN's. So there's just
+% not that much data being used. I think this illustrates the problem with
+% the ANOVA framework for repeated measures when the data are unbalanced.
+    
 %% Spaghetti plot of all the data
 
 % Label the figure with the name of the Excel file:
@@ -151,7 +222,7 @@ line([0,0],[ax(3),ax(4)],'Color','k','LineStyle','--');
 % B2 is the slope prior to menarche
 % (B2 + B3) is the slope after menarche
 %
-% Our scientific question is answered by testing B3 = 0
+% Our scientific question is answered by testing H0: B3 = 0
 
 % Create a new variable call 'posTime':
 ds.posTime = ds.time;
@@ -180,7 +251,18 @@ cv1 = psi{1};
 % correlation matrix:
 % [sd,corr] = cov2corr(covar);
 
+% If we want to calculate the variance of the slopes in the post-menarcheal
+% period, Var(b_2i + b_3i), we need to combine the variances using the
+% following formula:
+%
+%   var(x + y) = var(x) + var(y) + 2*cov(x,y)
+%
+% cv1(2,2) + cv1(3,3) + (2 * cv1(2,3)) = 0.8635
+%
+% Note that this is exactly the same value as cv2(3,3)
+
 %% Second model, as instantiated in Naumova et al. 2001
+% This is the 'Random Effects' model in Table 3 on the bottom of p. 1339
 % See p. 1336. They used a slightly different way of coding time w/r/t
 % menarche. Essentially they created a 'pre-time' and a 'post-time' so that
 % the 2 slopes would correspond to the pre- and post-menarchal slopes
@@ -205,9 +287,20 @@ cv2 = psi{1};
 % test our H0 that there is no difference after menarche. We can
 % definitively reject H0 (p = 9 x 10^-27).
 
-%% Plot the fixed effects fit
+%% Model #3 of Naumova et al. 2001: quadratic term for post-menarcheal slope
+% This is 'Model A' in Table 3 on the bottom of p. 1339
+% add a colum to ds for postTime^2
+ds.postTimeSq = ds.postTime .^ 2;
+lme3 = fitlme(ds,'pbf~preTime+postTime+postTimeSq + (1+preTime+postTime+postTimeSq|id)');
 
-% x data for 2 halves of fit
+% This model has an AIC of 6004.1 compared with a value of 6078.3 for model
+% #2. So the quadratic term appears justified. The coefficient for the
+% quadratic term is negative, and the linear slope is larger, so it looks
+% like the quadratic term allows for a sort of leveling off of an initially
+% steeper slope just after menarache.
+%% Plot the fixed effects fit for model #1
+
+% x data (time) for 2 halves of fit
 xNeg = -6:1:0;
 xPos = 0:1:4;
 
@@ -215,20 +308,30 @@ bFix = fixedEffects(lme1); % fixed effect coefficients
 
 yNeg = bFix(1) + (xNeg .* bFix(2));
 yPos = bFix(1) + (xPos .* (bFix(2)+bFix(3)));
-hFit = plot(xNeg,yNeg,'Color','k','LineStyle','-','LineWidth',2);
+hFit1 = plot(xNeg,yNeg,'Color','k','LineStyle','-','LineWidth',2);
 plot(xPos,yPos,'Color','k','LineStyle','-','LineWidth',2);
 
-legend([hSpline,hFit],{'Smoothing spline','Model fit'},'Location','Northwest');
+%% Plot the fixed effects fit for model #3
+
+bFix3 = fixedEffects(lme3); % fixed effect coefficients
+
+yNeg3 = bFix3(1) + (xNeg .* bFix3(2));
+yPos3 = bFix3(1) + (xPos .* bFix3(3)) + (xPos.^2 .* bFix3(4));
+hFit3 = plot(xNeg,yNeg3,'Color','r','LineStyle','-','LineWidth',2);
+plot(xPos,yPos3,'Color','r','LineStyle','-','LineWidth',2);
+
+legend([hSpline,hFit1,hFit3],{'Smoothing spline','Model #1','Model #3'},...
+    'Location','Northwest');
 
 %% Plots for example subjects
-
+% See GF lecture 25.9, beginning around 6:30
 % first figure
 figure(f1); subplot(1,2,2);
 
 % re-plot the fit to the population mean:
 plot(xNeg,yNeg,'Color','k','LineStyle','-','LineWidth',2);
 hold on
-plot(xPos,yPos,'Color','k','LineStyle','-','LineWidth',2);
+h0 = plot(xPos,yPos,'Color','k','LineStyle','-','LineWidth',2);
 
 for m = 1:length(exampleGirls)
     thisGirl = exampleGirls(m);
@@ -248,8 +351,8 @@ for m = 1:length(exampleGirls)
     % calculate and plot the lines:
     yNeg = bML1(1) + (xNeg .* bML1(2));
     yPos = bML1(1) + (xPos .* (bML1(2)+bML1(3)));
-    h1 = plot(xNeg,yNeg,'Color',myMap(thisGirl,:),'LineStyle','-','LineWidth',1.5);
-    plot(xPos,yPos,'Color',myMap(thisGirl,:),'LineStyle','-','LineWidth',1.5);
+    h1 = plot(xNeg,yNeg,'Color',myMap(thisGirl,:),'LineStyle','--','LineWidth',1.5);
+    plot(xPos,yPos,'Color',myMap(thisGirl,:),'LineStyle','--','LineWidth',1.5);
     
     % Plot the BLUP for this girl:
     % First find the random effects for this girl
@@ -257,12 +360,12 @@ for m = 1:length(exampleGirls)
     % Find appropriate rows in 'stats':
     L = strcmp(num2str(thisGirl),stats.Level);
     bRE = stats.Estimate(L);
-    % add to the fixed effects:
+    % add random effects to the fixed effects:
     bBLUP = bFix + bRE;
     yNeg = bBLUP(1) + (xNeg .* bBLUP(2));
     yPos = bBLUP(1) + (xPos .* (bBLUP(2)+bBLUP(3)));
-    h2 = plot(xNeg,yNeg,'Color',myMap(thisGirl,:),'LineStyle','--','LineWidth',1.5);
-    plot(xPos,yPos,'Color',myMap(thisGirl,:),'LineStyle','--','LineWidth',1.5);
+    h2 = plot(xNeg,yNeg,'Color',myMap(thisGirl,:),'LineStyle','-','LineWidth',1.5);
+    plot(xPos,yPos,'Color',myMap(thisGirl,:),'LineStyle','-','LineWidth',1.5);
     
 end
 
@@ -272,8 +375,14 @@ axis([min(ds.time),max(ds.time),ax(3),ax(4)]);
 line([0,0],[ax(3),ax(4)],'Color','k','LineStyle','--');
 xlabel('Time relative to menarche (yrs)');
 ylabel('Percent body fat');
-title('Shrinkage is real!');
-legend([h1,h2],{'ML fit','BLUP'});
+title('Two examples: Shrinkage is real!');
+legend([h0,h1,h2],{'Model #1','OLS fit','BLUP'});
+
+% This is a nice illustration of "shrinkage." For the girl with only 6
+% measurements, the BLUP ("best linear unbiased predictor"), is pulled
+% closer to the population average. When we have more data (and/or less
+% noisy data), the curve is closer to the ordinary least squares line fit
+% to that girl's data only.
 
 %% Regression diagnostics
 
