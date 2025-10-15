@@ -1,30 +1,30 @@
 % NDflood.m
-%
+% 
 % Quick probability calculation from Nate Silver's book
-%
+% 
 % RTB wrote it, 14 July 2019, Kinsale, Ireland; end of Cork Distance Week
-
+% 
 % Taken from Chapter 6 of Nate Silver's "The Signal and the Noise"
-%
+% 
 % Heading: "The Importance of Communicating Uncertainty"
-%
+% 
 % "In April 1997, the Red River of the North flooded Grand Forks, North
 % Dakota, overtopping the town's levees and spilling more than two miles
 % into the city. Although there was no loss of life, nearly all of the
 % city's 50,000 residents had to be evacuated, cleanup costs ran into the
 % billions of dollars, and 75 percent of the city's homes were damaged or
 % destroyed.
-%
+% 
 % . . . Residents of Grand Forks had been aware of the flood threat for
 % months. Snowfall had been especially heavy in the Great Plains that
 % winter, and the National Weather Service, anticipating runoff as the snow
 % melted, had predicted the waters of the Red River would crest to
 % forty-nine feet, close to the all-time record.
-%
+% 
 % There was just one small problem. The levees in Grand Forks had been
 % built to handle a flood of fifty-one feet. Even a small miss in the
 % forty-nine-foot prediction could prove catastrophic.
-%
+% 
 % . . . The margin of error on the Weather Service's forecast--based on how
 % well their flood forecasts had done in the past--was about plus or minus
 % nine feet . . . ."
@@ -57,6 +57,10 @@ p2 = normcdf(leveeHgt,predHgt,CI95/1.96,'upper');
 
 %% Same calculation by simulation:
 
+leveeHgt = 51;  % units = feet
+predHgt = 49;
+CI95 = 9; 
+
 % Suppose you didn't know about 'normcdf' (or, for that matter, 'normpdf',
 % but you had extensive experience with 'randn'.
 nSim = 100000;
@@ -66,14 +70,17 @@ pSim = sum(mySimHgts > leveeHgt) / nSim;
 
 % Plot the results of our simulation:
 figure, histogram(mySimHgts);
+mymap = colormap('lines');
 hold on
 ax = axis;
 hl = line([leveeHgt,leveeHgt],[ax(3),ax(4)]);
-set(hl,'Color','r');
+set(hl,'Color',mymap(7,:),'LineWidth',2);
+xlabel('Water Height (feet)')
+ylabel('#')
 
-% or can cheat and use 'normrnd'
-mySimHgts = normrnd(predHgt,CI95/1.96,nSim,1);
-pSim = sum(mySimHgts > leveeHgt) / nSim;
+% % or can cheat and use 'normrnd'
+% mySimHgts = normrnd(predHgt,CI95/1.96,nSim,1);
+% pSim = sum(mySimHgts > leveeHgt) / nSim;
 
 % Follow-up (Silver's book): "In fact, the river crested to fifty-four
 % feet."
