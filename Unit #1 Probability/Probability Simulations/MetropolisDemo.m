@@ -42,7 +42,7 @@ function [allTh, allProp] = MetropolisDemo(nSims)
 if nargin < 1
     nSims = 10000;
 end
-rng default
+rng shuffle
 
 th = 0:8;   % which island
 pTh = [0,round(rand(1,7).*7),0];    % population of each island
