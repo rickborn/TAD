@@ -24,10 +24,10 @@ for k = 1:height(ds)
     muMLE(k) = eval(ds.hitAB{k});
 end
 
-x = [1:height(ds)];     % x values for plots
+xAx = [1:height(ds)];     % x values for plots
 dkGold = [0.9290    0.6940    0.1250];
 %p1 = plot(x,muMLE,'k*');
-p1 = plot(x,muMLE,'^','Color',dkGold);
+p1 = plot(xAx,muMLE,'^','Color',dkGold);
 set(p1,'MarkerFaceColor',dkGold);
 hold on
 set(gca,'XTick',[1:18],'XTickLabel',ds.Player,'XTickLabelRotation',60);
@@ -40,11 +40,11 @@ set(hl,'Color','k','LineStyle','-');
 %% Calculate and plot the James-Stein estimator
 dkRed = [0.6350    0.0780    0.1840];
 muJS = JSestimator(muMLE,45);
-p2 = plot(x,muJS,'o','Color',dkRed);
+p2 = plot(xAx,muJS,'o','Color',dkRed);
 set(p2,'MarkerFaceColor',dkRed);
 
 %% Plot the season batting average--this is the ground truth value
-p3 = plot(x,ds.SeasonBA,'bs');
+p3 = plot(xAx,ds.SeasonBA,'bs');
 set(p3,'MarkerFaceColor','b');
 
 % add a legend

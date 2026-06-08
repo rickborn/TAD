@@ -52,7 +52,7 @@ fSD = 2.80;
 (mMu - fMu) / sqrt(mSD.^2 + fSD.^2);
 % ans = 1.36
 
-tailSDs = [3:7];
+tailSDs = 3:7;
 % 3.1 SD = 99.9th percentile
 % 4.2 SD = 99.999th percentile
 % 5.2 SD = 99.99999th percentile

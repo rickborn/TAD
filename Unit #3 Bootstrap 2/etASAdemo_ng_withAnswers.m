@@ -436,11 +436,11 @@ pChi2 = chi2cdf(chi2stat,df,'upper');
 
 %% Bonus: absolute vs. relative measures of efficacy (added 14 Jan 2020)
 
-% The take-home message here is from an interesting book by Jacob Stegenga
-% called "Medical Nihilism" (Oxford Univ. Press, 2018): relative risk
-% factors, such as our odds ratio, relative risk and relative risk
-% reduction tend to inflate the apparent effectiveness of a treatment,
-% because they fail to take into account the base rate. The "risk" such as
+The take-home message here is from an interesting book by Jacob Stegenga
+called "Medical Nihilism" (Oxford Univ. Press, 2018): relative risk
+factors, such as our odds ratio, relative risk and relative risk
+reduction tend to inflate the apparent effectiveness of a treatment,
+because they fail to take into account the base rate. The "risk" such as
 % (nMIrx/nRx) is a posterior probability, which takes into account the
 % (usually low) base rate of an outcome such as MI. However, when we take a
 % ratio of posterior probabilities, we effectively cancel out the base rate

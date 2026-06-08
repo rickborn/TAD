@@ -19,23 +19,23 @@ function [p,lme1,lme2,lme3,cv1,cv2,corr_rm] = lme_BFM(fileName)
 % - corr_rm: correlation matrix for the repeated measurements
 % 
 % This example is from:
-%
+% 
 % Naumova, E.N., Must, A. and Laird, N.M., 2001. Tutorial in biostatistics:
 % evaluating the impact of ‘critical periods’ in longitudinal studies of
 % growth using piecewise mixed effects models. International journal of
 % epidemiology, 30(6), pp.1332-1341.
-%
+% 
 % It was also covered by Garrett Fitzmaurice in lecture #25 of Brian
 % Healy's "Biostatistics Certificate" course. See my:
-%
+% 
 % 'Biostatistics-Lecture_Notes-RTB.docx', sections 25.7 to 25.10 for
 % details
-%
+% 
 % RTB wrote it, June 3, 2025; bending sails (jib + mainsail) with David Cardozo
-
+% 
 % Scientific question: Does the rate of body fat accumulation in girls
 % change at menarche?
-%
+% 
 % Experiment:
 % 1. Prospective study on body fat accretion in a cohort of 162 girls from the
 % MIT Growth and Development Study
@@ -46,12 +46,12 @@ function [p,lme1,lme2,lme3,cv1,cv2,corr_rm] = lme_BFM(fileName)
 % reported date of menarche.
 % 5. At each examination, a measure of body fatness was obtained based on
 % bioelectric impedance analysis.
-%
+% 
 % Data: (http://alecri.github.io/downloads/data/bodyfat.RData)
 % I converted it to an Excel file using my 'ds2xls.R' script.
 % A total of 1049 measurements from 162 girls. Each row corresponds to one
 % measurement of % body fat:
-%
+% 
 % Variables:
 % 1. 'id' - individual subject id number (1 to 162)
 % 2. 'agec' - girl's age in years at the time of the measurement
@@ -89,8 +89,9 @@ end
 figure('Name','Unbalanced data');
 histogram(allMs);
 xlabel('Total number of measurements');
-ylabel('Number of subjects');
+ylabel('Number of participants');
 title('Compare with Table 1 of Naumova et al. 2001');
+set(gca,'FontSize',12)
 
 %% Try to look at correlations among repeated measurments.
 % To do this in MATLAB, I think we need to create a new table and use the
@@ -174,7 +175,7 @@ subplot(1,2,1)
 % do it with a 'for' loop
 for k = 1:nGirls
     h = plot(ds.time(ds.id == k),ds.pbf(ds.id == k),'Color',myMap(k,:),...
-        'Marker','.','LineStyle','-');
+        'Marker','none','LineStyle','-');
     hold on
     if any(k == exampleGirls)
         set(h,'Marker','^','MarkerFaceColor',myMap(k,:),'LineWidth',1.5);
@@ -386,8 +387,8 @@ legend([h0,h1,h2],{'Model #1','OLS fit','BLUP'});
 
 %% Regression diagnostics
 
-model = lme1;
-mText = '1';
+model = lme3;
+mText = '3';
 
 figure('Name','Regression Diagnostics','Position',[50 50 1200 400]);
 subplot(1,2,1);
