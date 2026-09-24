@@ -1,10 +1,10 @@
-function [p,lme1,lme2,lme3,cv1,cv2,corr_rm] = lme_BFM(fileName)
+function [p,lme1,lme2,lme3,cv1,cv2,C] = lme_BFM(fileName)
 
 % lme_BFM.m: linear mixed-effects model of bodyfat/menarche data
 %
-% [p,lme1,lme2,lme3,cv1,cv2,corr_rm] = lme_BFM(fileName)
+% [p,lme1,lme2,lme3,cv1,cv2,C] = lme_BFM(fileName)
 %
-% e.g. [p,M1,M2,M3,cv1,cv2,corr_rm] = lme_BFM('bodyfat.xlsx')
+% e.g. [p,M1,M2,M3,cv1,cv2,C] = lme_BFM('bodyfat.xlsx')
 %
 % Inputs:
 % - fileName: Excel file containing data
@@ -16,7 +16,7 @@ function [p,lme1,lme2,lme3,cv1,cv2,corr_rm] = lme_BFM(fileName)
 % - lme3: includes a quadratic term for the post-menarcheal slope
 % - cv1: the covariance matrix for the random effects for model #1
 % - cv2: the covariance matrix for the random effects for model #2
-% - corr_rm: correlation matrix for the repeated measurements
+% - C: correlation matrix for the repeated measurements
 % 
 % This example is from:
 % 
@@ -161,6 +161,10 @@ corr_rm = array2table(c_rm,...
 % that 'fitrm' ignores any observations that contain NaN's. So there's just
 % not that much data being used. I think this illustrates the problem with
 % the ANOVA framework for repeated measures when the data are unbalanced.
+%
+% Note: Thanks to Chat-GPT, I finally figured out how to do this
+% calculation properly using the covariance from the random effects! See
+% below.
     
 %% Spaghetti plot of all the data
 
@@ -242,7 +246,7 @@ lme1 = fitlme(ds,'pbf ~ time + posTime + (1 + time + posTime|id)');
 p = lme1.Coefficients.pValue(3);
 
 %% Extract the covariance matrix for the random effects:
-psi = covarianceParameters(lme1);
+[psi,mse] = covarianceParameters(lme1);
 cv1 = psi{1};
 % The main diagonal gives the variances of the 3 random effects
 % Off-diagonals are covariances between pairs of random effects
@@ -261,6 +265,27 @@ cv1 = psi{1};
 % cv1(2,2) + cv1(3,3) + (2 * cv1(2,3)) = 0.8635
 %
 % Note that this is exactly the same value as cv2(3,3)
+
+%% Calculate the correlations among repeated measures
+% Thanks to a tutorial from Chat-GPT, I think I finally figured this out!
+
+% We've already extracted the covariance matrix for the random effects.
+% Next need to create the design matrix for our desired times:
+allTimes = -4:1:4;
+posTimes = allTimes;
+posTimes(posTimes <= 0) = 0;
+nTimes = length(allTimes);
+Z = [ones(nTimes,1),allTimes',posTimes'];
+
+% calculate the marginal covariance matrix (Thank you, Chat-GPT!):
+V = (Z*cv1*Z') + mse*eye(nTimes);
+
+% convert the covariance to correlations:
+[~,C] = cov2corr(V);
+
+% Since the main diagonal will be all ones, it's customary to replace them
+% with the actual variances:
+C(logical(eye(length(C)))) = diag(V,0);
 
 %% Second model, as instantiated in Naumova et al. 2001
 % This is the 'Random Effects' model in Table 3 on the bottom of p. 1339
