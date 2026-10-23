@@ -1,6 +1,12 @@
-function [allModels] = ICC_demo(panel,nObsPerGroup)
+function [allModels,pVal] = ICC_demo(panel,nObsPerGroup)
 %
 % reproducing figures 2 & 3 of Aarts et al. 2014
+%
+% [allModels,pVal] = ICC_demo(panel,nObsPerGroup)
+%
+% e.g. [M,p] = ICC_demo('c',15);
+%
+% RTB wrote it, updated 23 October 2026, BPL Copley Square
 
 %% Defaults
 if nargin < 2, nObsPerGroup = 10; end
@@ -60,6 +66,10 @@ varB = var(gMeans,1);
 ICCgroup = varB / (varB + varW);
 fprintf(1,'ICC: %.3f\n', ICCgroup);
 
+%% Do an ANOVA
+[pVal, ~, ~] = anova1(y,[],'off');
+fprintf(1,'ANOVA p-value: %.4f\n', pVal);
+
 %% Plot the raw data:
 x = jitter(T.grpID,0.2);
 f1 = figure('Name','Aarts et al. 2014, Figs. 2 & 3','Position',[50 600 1200 400]);
@@ -92,6 +102,7 @@ xlabel('Group')
 ylabel('y')
 title(['\rm Variance \bf between \rm groups: ' num2str(varB,2)]);
 text(2,ax(4)-1,['\bf ICC \rm= ' num2str(ICCgroup,2)]);
+text(2,ax(4)-1.5,['\bf p-Val \rm= ' num2str(pVal,4)]);
 
 %% Create a new table of just the means and the treatment
 Tm = table();
